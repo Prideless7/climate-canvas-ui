@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -17,16 +18,16 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
+    --primary: 196 77% 45%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 210 40% 96.1%;
+    --secondary: 142 71% 45%;
     --secondary-foreground: 222.2 47.4% 11.2%;
 
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 210 40% 96.1%;
+    --accent: 48 94% 68%;
     --accent-foreground: 222.2 47.4% 11.2%;
 
     --destructive: 0 84.2% 60.2%;
@@ -34,25 +35,24 @@ All colors MUST be HSL.
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 196 77% 45%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
+    --sidebar-background: 196 100% 97%;
+    --sidebar-foreground: 222.2 84% 4.9%;
+    --sidebar-primary: 196 77% 45%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 196 50% 90%;
+    --sidebar-accent-foreground: 222.2 84% 4.9%;
+    --sidebar-border: 214.3 31.8% 91.4%;
+    --sidebar-ring: 196 77% 45%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Custom meteorology colors */
+    --temperature: 12 76% 61%;
+    --humidity: 196 77% 45%;
+    --solar: 48 94% 68%;
+    --rainfall: 142 71% 45%;
   }
 
   .dark {
@@ -65,32 +65,39 @@ All colors MUST be HSL.
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
+    --primary: 196 77% 55%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
-    --secondary: 217.2 32.6% 17.5%;
+    --secondary: 142 71% 55%;
     --secondary-foreground: 210 40% 98%;
 
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 48 94% 78%;
+    --accent-foreground: 222.2 47.4% 11.2%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --ring: 196 77% 55%;
+
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary: 196 77% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 196 77% 55%;
+
+    /* Custom meteorology colors - dark theme */
+    --temperature: 12 86% 71%;
+    --humidity: 196 87% 55%;
+    --solar: 48 100% 78%;
+    --rainfall: 142 81% 55%;
   }
 }
 
@@ -101,5 +108,44 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .text-temperature {
+    color: hsl(var(--temperature));
+  }
+  .text-humidity {
+    color: hsl(var(--humidity));
+  }
+  .text-solar {
+    color: hsl(var(--solar));
+  }
+  .text-rainfall {
+    color: hsl(var(--rainfall));
+  }
+  .bg-temperature {
+    background-color: hsl(var(--temperature));
+  }
+  .bg-humidity {
+    background-color: hsl(var(--humidity));
+  }
+  .bg-solar {
+    background-color: hsl(var(--solar));
+  }
+  .bg-rainfall {
+    background-color: hsl(var(--rainfall));
+  }
+  .border-temperature {
+    border-color: hsl(var(--temperature));
+  }
+  .border-humidity {
+    border-color: hsl(var(--humidity));
+  }
+  .border-solar {
+    border-color: hsl(var(--solar));
+  }
+  .border-rainfall {
+    border-color: hsl(var(--rainfall));
   }
 }
