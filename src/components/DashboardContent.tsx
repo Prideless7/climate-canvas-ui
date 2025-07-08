@@ -125,7 +125,7 @@ export const DashboardContent = ({ selectedStation, onStationSelect }: Dashboard
               <CardDescription>
                 Comprehensive view of all meteorological parameters
               </CardDescription>
-            </CardContent>
+            </CardHeader>
             <CardContent>
               <CombinedChart detailed />
             </CardContent>
