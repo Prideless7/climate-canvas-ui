@@ -7,6 +7,7 @@ import { DashboardContent } from "./DashboardContent";
 
 export const Dashboard = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [selectedStation, setSelectedStation] = useState("heraklion");
 
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
@@ -19,8 +20,15 @@ export const Dashboard = () => {
         <div className="min-h-screen flex w-full bg-background">
           <AppSidebar />
           <div className="flex-1 flex flex-col">
-            <DashboardHeader isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
-            <DashboardContent />
+            <DashboardHeader 
+              isDarkMode={isDarkMode} 
+              toggleTheme={toggleTheme}
+              selectedStation={selectedStation}
+            />
+            <DashboardContent 
+              selectedStation={selectedStation}
+              onStationSelect={setSelectedStation}
+            />
           </div>
         </div>
       </SidebarProvider>

@@ -6,10 +6,19 @@ import { RainfallChart } from "./charts/RainfallChart";
 import { SolarRadiationChart } from "./charts/SolarRadiationChart";
 import { CombinedChart } from "./charts/CombinedChart";
 import { MetricsOverview } from "./MetricsOverview";
+import { CreteMap } from "./CreteMap";
 
-export const DashboardContent = () => {
+interface DashboardContentProps {
+  selectedStation: string;
+  onStationSelect: (stationId: string) => void;
+}
+
+export const DashboardContent = ({ selectedStation, onStationSelect }: DashboardContentProps) => {
   return (
     <main className="flex-1 p-6 space-y-6 bg-gradient-to-br from-blue-50/50 via-green-50/30 to-yellow-50/20 dark:from-blue-950/20 dark:via-green-950/10 dark:to-yellow-950/10">
+      {/* Station Selection Map */}
+      <CreteMap selectedStation={selectedStation} onStationSelect={onStationSelect} />
+      
       <MetricsOverview />
       
       <Tabs defaultValue="overview" className="space-y-6">
@@ -116,7 +125,7 @@ export const DashboardContent = () => {
               <CardDescription>
                 Comprehensive view of all meteorological parameters
               </CardDescription>
-            </CardHeader>
+            </CardContent>
             <CardContent>
               <CombinedChart detailed />
             </CardContent>

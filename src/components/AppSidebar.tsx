@@ -75,12 +75,13 @@ const dataItems = [
 ];
 
 export function AppSidebar() {
-  const { collapsed } = useSidebar();
+  const { state } = useSidebar();
+  const isCollapsed = state === "collapsed";
 
   return (
-    <Sidebar className={collapsed ? "w-14" : "w-64"} collapsible>
+    <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border p-4">
-        {!collapsed && (
+        {!isCollapsed && (
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <BarChart3 className="w-5 h-5 text-primary-foreground" />
@@ -102,7 +103,7 @@ export function AppSidebar() {
                 <SidebarMenuItem key={item.id}>
                   <SidebarMenuButton className="hover:bg-sidebar-accent">
                     <item.icon className="w-4 h-4" />
-                    {!collapsed && <span>{item.title}</span>}
+                    {!isCollapsed && <span>{item.title}</span>}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -118,7 +119,7 @@ export function AppSidebar() {
                 <SidebarMenuItem key={item.id}>
                   <SidebarMenuButton className="hover:bg-sidebar-accent">
                     <item.icon className="w-4 h-4" />
-                    {!collapsed && <span>{item.title}</span>}
+                    {!isCollapsed && <span>{item.title}</span>}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}

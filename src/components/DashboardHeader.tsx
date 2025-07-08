@@ -14,9 +14,19 @@ import { Badge } from "@/components/ui/badge";
 interface DashboardHeaderProps {
   isDarkMode: boolean;
   toggleTheme: () => void;
+  selectedStation: string;
 }
 
-export const DashboardHeader = ({ isDarkMode, toggleTheme }: DashboardHeaderProps) => {
+const stationNames: Record<string, string> = {
+  heraklion: "Heraklion Central",
+  chania: "Chania Airport",
+  rethymno: "Rethymno Port",
+  sitia: "Sitia Observatory",
+  ierapetra: "Ierapetra Coastal",
+  kissamos: "Kissamos Bay"
+};
+
+export const DashboardHeader = ({ isDarkMode, toggleTheme, selectedStation }: DashboardHeaderProps) => {
   return (
     <header className="h-16 border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
       <div className="h-full px-4 flex items-center justify-between">
@@ -26,6 +36,9 @@ export const DashboardHeader = ({ isDarkMode, toggleTheme }: DashboardHeaderProp
             <h1 className="text-xl font-semibold text-foreground">Weather Dashboard</h1>
             <Badge variant="secondary" className="bg-primary/10 text-primary">
               Live Data
+            </Badge>
+            <Badge variant="outline" className="text-xs">
+              {stationNames[selectedStation] || "Unknown Station"}
             </Badge>
           </div>
         </div>
