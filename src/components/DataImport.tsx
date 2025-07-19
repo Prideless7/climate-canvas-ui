@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Upload, FileText } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Upload, FileText, MapPin } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { MeteoData } from "./Dashboard";
 
@@ -12,7 +13,18 @@ interface DataImportProps {
 
 export const DataImport = ({ onDataImport }: DataImportProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedStation, setSelectedStation] = useState<string>("");
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const { toast } = useToast();
+
+  const availableStations = [
+    { id: "chania", name: "Chania Airport", location: "Chania" },
+    { id: "heraklion", name: "Heraklion Airport", location: "Heraklion" },
+    { id: "sitia", name: "Sitia Airport", location: "Sitia" },
+    { id: "rethymno", name: "Rethymno Station", location: "Rethymno" },
+    { id: "ierapetra", name: "Ierapetra Station", location: "Ierapetra" },
+    { id: "kissamos", name: "Kissamos Bay", location: "Kissamos" },
+  ];
 
   const parseCSV = (csvText: string): MeteoData[] => {
     const lines = csvText.trim().split('\n');
@@ -49,21 +61,40 @@ export const DataImport = ({ onDataImport }: DataImportProps) => {
       return;
     }
 
+    setUploadedFile(file);
+  };
+
+  const handleImport = async () => {
+    if (!uploadedFile || !selectedStation) {
+      toast({
+        title: "Missing information",
+        description: "Please select a station and upload a CSV file.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     
     try {
-      const text = await file.text();
+      const text = await uploadedFile.text();
       const data = parseCSV(text);
       
-      // Extract station name from filename (assuming format like "chania_airport.csv")
-      const stationName = file.name.replace('.csv', '').replace(/_/g, ' ').toLowerCase();
+      const stationInfo = availableStations.find(s => s.id === selectedStation);
       
-      onDataImport(stationName, data);
+      onDataImport(selectedStation, data);
       
       toast({
         title: "Data imported successfully",
-        description: `Imported ${data.length} records for ${stationName}`,
+        description: `Imported ${data.length} records for ${stationInfo?.name}`,
       });
+
+      // Reset form
+      setSelectedStation("");
+      setUploadedFile(null);
+      const fileInput = document.getElementById('csv-upload') as HTMLInputElement;
+      if (fileInput) fileInput.value = '';
+      
     } catch (error) {
       toast({
         title: "Import failed",
@@ -72,8 +103,6 @@ export const DataImport = ({ onDataImport }: DataImportProps) => {
       });
     } finally {
       setIsLoading(false);
-      // Reset the input
-      event.target.value = '';
     }
   };
 
@@ -88,32 +117,87 @@ export const DataImport = ({ onDataImport }: DataImportProps) => {
           Upload CSV files containing meteorological station data
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex items-center justify-center w-full">
-          <label htmlFor="csv-upload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-muted border-dashed rounded-lg cursor-pointer bg-muted/10 hover:bg-muted/20 transition-colors">
-            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-              <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
-              <p className="mb-2 text-sm text-muted-foreground">
-                <span className="font-semibold">Click to upload</span> CSV file
-              </p>
-              <p className="text-xs text-muted-foreground">CSV files only</p>
-            </div>
-            <Input
-              id="csv-upload"
-              type="file"
-              accept=".csv"
-              onChange={handleFileUpload}
-              disabled={isLoading}
-              className="hidden"
-            />
+      <CardContent className="space-y-6">
+        {/* Station Selection */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium flex items-center gap-2">
+            <MapPin className="h-4 w-4" />
+            Select Station
           </label>
+          <Select value={selectedStation} onValueChange={setSelectedStation}>
+            <SelectTrigger>
+              <SelectValue placeholder="Choose a meteorological station" />
+            </SelectTrigger>
+            <SelectContent>
+              {availableStations.map((station) => (
+                <SelectItem key={station.id} value={station.id}>
+                  <div className="flex flex-col">
+                    <span className="font-medium">{station.name}</span>
+                    <span className="text-xs text-muted-foreground">{station.location}</span>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-        
-        {isLoading && (
-          <div className="text-center text-sm text-muted-foreground">
-            Processing file...
+
+        {/* File Upload */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            Upload CSV File
+          </label>
+          <div className="flex items-center justify-center w-full">
+            <label htmlFor="csv-upload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-muted border-dashed rounded-lg cursor-pointer bg-muted/10 hover:bg-muted/20 transition-colors">
+              <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
+                {uploadedFile ? (
+                  <div className="text-center">
+                    <p className="mb-2 text-sm text-foreground font-medium">
+                      {uploadedFile.name}
+                    </p>
+                    <p className="text-xs text-muted-foreground">File ready for import</p>
+                  </div>
+                ) : (
+                  <div className="text-center">
+                    <p className="mb-2 text-sm text-muted-foreground">
+                      <span className="font-semibold">Click to upload</span> CSV file
+                    </p>
+                    <p className="text-xs text-muted-foreground">CSV files only</p>
+                  </div>
+                )}
+              </div>
+              <Input
+                id="csv-upload"
+                type="file"
+                accept=".csv"
+                onChange={handleFileUpload}
+                disabled={isLoading}
+                className="hidden"
+              />
+            </label>
           </div>
-        )}
+        </div>
+
+        {/* Import Button */}
+        <Button 
+          onClick={handleImport}
+          disabled={!selectedStation || !uploadedFile || isLoading}
+          className="w-full"
+          size="lg"
+        >
+          {isLoading ? (
+            <>
+              <Upload className="mr-2 h-4 w-4 animate-spin" />
+              Processing...
+            </>
+          ) : (
+            <>
+              <Upload className="mr-2 h-4 w-4" />
+              Import Data
+            </>
+          )}
+        </Button>
         
         <div className="text-xs text-muted-foreground">
           <p className="font-medium mb-1">Expected CSV format:</p>
