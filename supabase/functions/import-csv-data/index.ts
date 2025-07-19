@@ -197,9 +197,9 @@ Deno.serve(async (req) => {
       .from('stations')
       .select('id')
       .eq('name', stationName)
-      .single();
+      .maybeSingle();
 
-    if (stationError && stationError.code === 'PGRST116') {
+    if (!station) {
       // Station doesn't exist, create it
       const { data: newStation, error: createError } = await supabase
         .from('stations')

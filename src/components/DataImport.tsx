@@ -19,15 +19,11 @@ export const DataImport = ({ onDataImport }: DataImportProps) => {
   const { toast } = useToast();
 
   const availableStations = [
-    { id: "ΤΥΜΠΑΚΙ", name: "Tympaki Station", location: "Tympaki" },
-    { id: "ΠΟΤΑΜΙΕΣ", name: "Potamies Station", location: "Potamies" },
-    { id: "ΠΥΡΓΟΣ", name: "Pyrgos Station", location: "Pyrgos" },
-    { id: "ΔΟΞΑΡΟ", name: "Doxaro Station", location: "Doxaro" },
-    { id: "ΖΗΡΟΣ", name: "Ziros Station", location: "Ziros" },
-    { id: "M05", name: "M05 Station", location: "M05" },
-    { id: "M07", name: "M07 Station", location: "M07" },
-    { id: "M02", name: "M02 Station", location: "M02" },
-    { id: "M04", name: "M04 Station", location: "M04" },
+    { id: "Tympaki", name: "Tympaki Station", location: "Tympaki" },
+    { id: "Potamies", name: "Potamies Station", location: "Potamies" },
+    { id: "Pyrgos", name: "Pyrgos Station", location: "Pyrgos" },
+    { id: "Doxaro", name: "Doxaro Station", location: "Doxaro" },
+    { id: "Ziros", name: "Ziros Station", location: "Ziros" },
   ];
 
 
