@@ -113,6 +113,7 @@ export const Dashboard = () => {
                 stationData={getCurrentStationData()}
                 availableStations={Object.keys(stationData)}
                 currentView={currentView}
+                timePeriod={timePeriod}
               />
             )}
           </div>
