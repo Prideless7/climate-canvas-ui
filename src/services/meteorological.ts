@@ -112,9 +112,15 @@ export const meteorologicalService = {
   },
 
   async getStationDataByTimePeriod(stationId: string, timePeriod: string): Promise<MeteoData[]> {
+    console.log('getStationDataByTimePeriod called with:', stationId, timePeriod);
     const allData = await this.getStationData(stationId);
     
-    if (!allData.length) return allData;
+    console.log('getStationDataByTimePeriod received data:', allData.length, 'items');
+    
+    if (!allData.length) {
+      console.log('No data from getStationData, returning empty array');
+      return allData;
+    }
     
     const now = new Date();
     let cutoffDate: Date;
@@ -133,13 +139,23 @@ export const meteorologicalService = {
         cutoffDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
         break;
       default:
+        console.log('Unknown time period, returning all data');
         return allData;
     }
     
-    return allData.filter(item => {
+    console.log('Filtering data from cutoff date:', cutoffDate);
+    
+    const filteredData = allData.filter(item => {
       // Parse date in YYYY-MM-DD format from database
       const itemDate = new Date(item.date);
-      return itemDate >= cutoffDate;
+      const isValid = itemDate >= cutoffDate;
+      if (!isValid) {
+        console.log('Filtering out old data:', item.date, 'vs cutoff:', cutoffDate);
+      }
+      return isValid;
     });
+    
+    console.log('Filtered data result:', filteredData.length, 'items after date filtering');
+    return filteredData;
   }
 };
