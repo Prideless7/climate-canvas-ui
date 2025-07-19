@@ -45,7 +45,14 @@ export const meteorologicalService = {
   async getStationData(stationName: string): Promise<MeteoData[]> {
     console.log('Fetching data for station:', stationName);
     
-    // Get the meteorological readings directly by station name
+    // First, let's check what stations exist
+    const { data: stationsCheck } = await supabase
+      .from('stations')
+      .select('name')
+      .ilike('name', `%${stationName}%`);
+    console.log('Similar station names in DB:', stationsCheck?.map(s => s.name));
+    
+    // Get the meteorological readings using exact station name match
     const { data, error } = await supabase
       .from('meteorological_readings')
       .select(`
@@ -54,7 +61,10 @@ export const meteorologicalService = {
       `)
       .eq('stations.name', stationName)
       .order('date', { ascending: true })
-      .order('time', { ascending: true });
+      .order('time', { ascending: true })
+      .limit(100);
+
+    console.log('Query executed with station name:', stationName);
 
     if (error) {
       console.error('Error fetching meteorological data:', error);
@@ -62,13 +72,26 @@ export const meteorologicalService = {
     }
 
     console.log(`Found ${data?.length || 0} readings for station ${stationName}`);
+    console.log('Raw data sample:', data?.[0]);
+    
     if (!data || data.length === 0) {
       console.warn(`No data found for station: ${stationName}`);
+      
+      // Let's try a different approach - check all available data
+      const { data: allData } = await supabase
+        .from('meteorological_readings')
+        .select(`
+          *,
+          stations(name)
+        `)
+        .limit(5);
+      console.log('Sample of all available data:', allData);
+      
       return [];
     }
 
     // Convert database format to MeteoData format
-    return data.map((reading: MeteoReading) => ({
+    const transformedData = data.map((reading: any) => ({
       date: reading.date,
       time: reading.time,
       temperature: reading.temperature || 0,
@@ -79,7 +102,13 @@ export const meteorologicalService = {
       pressure: reading.pressure || 0,
       solarRadiation: reading.solar_radiation || 0,
       eto: reading.eto || 0,
+      rainDuration: reading.rain_duration || 0
     }));
+
+    console.log('Transformed data sample:', transformedData[0]);
+    console.log('Returning', transformedData.length, 'records');
+    
+    return transformedData;
   },
 
   async getStationDataByTimePeriod(stationId: string, timePeriod: string): Promise<MeteoData[]> {
