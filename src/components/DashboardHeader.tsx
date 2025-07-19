@@ -51,6 +51,7 @@ export const DashboardHeader = ({ isDarkMode, toggleTheme, selectedStation, time
               <SelectValue placeholder="Period" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="all">All Data</SelectItem>
               <SelectItem value="7d">Last 7 days</SelectItem>
               <SelectItem value="30d">Last 30 days</SelectItem>
               <SelectItem value="90d">Last 3 months</SelectItem>

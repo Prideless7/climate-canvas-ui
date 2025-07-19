@@ -138,8 +138,9 @@ export const meteorologicalService = {
       case "1y":
         cutoffDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
         break;
+      case "all":
       default:
-        console.log('Unknown time period, returning all data');
+        console.log('Showing all data, no date filtering');
         return allData;
     }
     

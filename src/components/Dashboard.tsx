@@ -28,7 +28,7 @@ export const Dashboard = () => {
   const [stationData, setStationData] = useState<MeteoData[]>([]);
   const [availableStations, setAvailableStations] = useState<string[]>([]);
   const [isDataImported, setIsDataImported] = useState(false);
-  const [timePeriod, setTimePeriod] = useState("30d");
+  const [timePeriod, setTimePeriod] = useState("all");
   const [currentView, setCurrentView] = useState("import");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
