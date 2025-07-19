@@ -6,9 +6,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Upload, FileText, MapPin } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { MeteoData } from "./Dashboard";
+import { supabase } from "@/integrations/supabase/client";
 
 interface DataImportProps {
-  onDataImport: (stationName: string, data: MeteoData[]) => void;
+  onDataImport: (stationName: string) => void;
 }
 
 export const DataImport = ({ onDataImport }: DataImportProps) => {
@@ -18,35 +19,17 @@ export const DataImport = ({ onDataImport }: DataImportProps) => {
   const { toast } = useToast();
 
   const availableStations = [
-    { id: "chania", name: "Chania Airport", location: "Chania" },
-    { id: "heraklion", name: "Heraklion Airport", location: "Heraklion" },
-    { id: "sitia", name: "Sitia Airport", location: "Sitia" },
-    { id: "rethymno", name: "Rethymno Station", location: "Rethymno" },
-    { id: "ierapetra", name: "Ierapetra Station", location: "Ierapetra" },
-    { id: "kissamos", name: "Kissamos Bay", location: "Kissamos" },
+    { id: "ΤΥΜΠΑΚΙ", name: "Tympaki Station", location: "Tympaki" },
+    { id: "ΠΟΤΑΜΙΕΣ", name: "Potamies Station", location: "Potamies" },
+    { id: "ΠΥΡΓΟΣ", name: "Pyrgos Station", location: "Pyrgos" },
+    { id: "ΔΟΞΑΡΟ", name: "Doxaro Station", location: "Doxaro" },
+    { id: "ΖΗΡΟΣ", name: "Ziros Station", location: "Ziros" },
+    { id: "M05", name: "M05 Station", location: "M05" },
+    { id: "M07", name: "M07 Station", location: "M07" },
+    { id: "M02", name: "M02 Station", location: "M02" },
+    { id: "M04", name: "M04 Station", location: "M04" },
   ];
 
-  const parseCSV = (csvText: string): MeteoData[] => {
-    const lines = csvText.trim().split('\n');
-    const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
-    
-    return lines.slice(1).map(line => {
-      const values = line.split(',').map(v => v.replace(/"/g, '').trim());
-      
-      return {
-        date: values[0] || '',
-        time: values[1] || '',
-        humidity: parseFloat(values[2]) || 0,
-        precipitation: parseFloat(values[3]) || 0,
-        windSpeed: parseFloat(values[4]) || 0,
-        temperature: parseFloat(values[6]) || 0,
-        solarRadiation: parseFloat(values[7]) || 0,
-        windDirection: parseFloat(values[8]) || 0,
-        pressure: parseFloat(values[9]) || 0,
-        eto: parseFloat(values[10]) || 0,
-      };
-    });
-  };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -77,16 +60,26 @@ export const DataImport = ({ onDataImport }: DataImportProps) => {
     setIsLoading(true);
     
     try {
-      const text = await uploadedFile.text();
-      const data = parseCSV(text);
-      
+      const csvData = await uploadedFile.text();
       const stationInfo = availableStations.find(s => s.id === selectedStation);
       
-      onDataImport(selectedStation, data);
+      // Call backend API to process and store CSV data
+      const { data, error } = await supabase.functions.invoke('import-csv-data', {
+        body: {
+          stationName: selectedStation,
+          csvData: csvData
+        }
+      });
+
+      if (error) {
+        throw new Error(error.message || 'Failed to import data');
+      }
+
+      onDataImport(selectedStation);
       
       toast({
         title: "Data imported successfully",
-        description: `Imported ${data.length} records for ${stationInfo?.name}`,
+        description: `Imported ${data.inserted} records for ${stationInfo?.name}. ${data.skipped > 0 ? `Skipped ${data.skipped} invalid rows.` : ''}`,
       });
 
       // Reset form
@@ -95,10 +88,11 @@ export const DataImport = ({ onDataImport }: DataImportProps) => {
       const fileInput = document.getElementById('csv-upload') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
       
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Import error:', error);
       toast({
         title: "Import failed",
-        description: "There was an error parsing the CSV file.",
+        description: error.message || "There was an error importing the CSV file.",
         variant: "destructive",
       });
     } finally {

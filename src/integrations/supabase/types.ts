@@ -14,7 +14,92 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      meteorological_readings: {
+        Row: {
+          created_at: string
+          date: string
+          eto: number | null
+          humidity: number | null
+          id: string
+          precipitation: number | null
+          pressure: number | null
+          rain_duration: number | null
+          solar_radiation: number | null
+          station_id: string
+          temperature: number | null
+          time: string
+          updated_at: string
+          wind_direction: number | null
+          wind_speed: number | null
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          eto?: number | null
+          humidity?: number | null
+          id?: string
+          precipitation?: number | null
+          pressure?: number | null
+          rain_duration?: number | null
+          solar_radiation?: number | null
+          station_id: string
+          temperature?: number | null
+          time: string
+          updated_at?: string
+          wind_direction?: number | null
+          wind_speed?: number | null
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          eto?: number | null
+          humidity?: number | null
+          id?: string
+          precipitation?: number | null
+          pressure?: number | null
+          rain_duration?: number | null
+          solar_radiation?: number | null
+          station_id?: string
+          temperature?: number | null
+          time?: string
+          updated_at?: string
+          wind_direction?: number | null
+          wind_speed?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meteorological_readings_station_id_fkey"
+            columns: ["station_id"]
+            isOneToOne: false
+            referencedRelation: "stations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stations: {
+        Row: {
+          created_at: string
+          id: string
+          location: string | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          location?: string | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          location?: string | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

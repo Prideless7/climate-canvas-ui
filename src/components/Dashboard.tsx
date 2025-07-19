@@ -1,10 +1,12 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { DashboardHeader } from "./DashboardHeader";
 import { DashboardContent } from "./DashboardContent";
 import { DataImport } from "./DataImport";
+import { meteorologicalService } from "@/services/meteorological";
+import { useToast } from "@/hooks/use-toast";
 
 export interface MeteoData {
   date: string;
@@ -22,24 +24,57 @@ export interface MeteoData {
 export const Dashboard = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [selectedStation, setSelectedStation] = useState("");
-  const [stationData, setStationData] = useState<Record<string, MeteoData[]>>({});
+  const [stationData, setStationData] = useState<MeteoData[]>([]);
+  const [availableStations, setAvailableStations] = useState<string[]>([]);
   const [isDataImported, setIsDataImported] = useState(false);
   const [timePeriod, setTimePeriod] = useState("30d");
   const [currentView, setCurrentView] = useState("import");
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
     document.documentElement.classList.toggle("dark");
   };
 
-  const handleDataImport = (stationName: string, data: MeteoData[]) => {
-    setStationData(prev => ({
-      ...prev,
-      [stationName]: data
-    }));
-    setIsDataImported(true);
+  const loadStations = async () => {
+    try {
+      const stations = await meteorologicalService.getStations();
+      const stationNames = stations.map(s => s.name);
+      setAvailableStations(stationNames);
+      
+      if (stationNames.length > 0) {
+        setIsDataImported(true);
+      }
+    } catch (error) {
+      console.error('Error loading stations:', error);
+    }
+  };
+
+  const loadStationData = async (stationName: string) => {
+    if (!stationName) return;
+    
+    setIsLoading(true);
+    try {
+      const data = await meteorologicalService.getStationDataByTimePeriod(stationName, timePeriod);
+      setStationData(data);
+    } catch (error: any) {
+      console.error('Error loading station data:', error);
+      toast({
+        title: "Error loading data",
+        description: error.message || "Failed to load meteorological data",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDataImport = async (stationName: string) => {
     setSelectedStation(stationName);
     setCurrentView("overview");
+    await loadStations();
+    await loadStationData(stationName);
   };
 
   const handleNavigationChange = (viewId: string) => {
@@ -50,40 +85,22 @@ export const Dashboard = () => {
     }
   };
 
-  const filterDataByTimePeriod = (data: MeteoData[]): MeteoData[] => {
-    if (!data.length) return data;
-    
-    const now = new Date();
-    let cutoffDate: Date;
-    
-    switch (timePeriod) {
-      case "7d":
-        cutoffDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        break;
-      case "30d":
-        cutoffDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-        break;
-      case "90d":
-        cutoffDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
-        break;
-      case "1y":
-        cutoffDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
-        break;
-      default:
-        return data;
-    }
-    
-    return data.filter(item => {
-      const [day, month, year] = item.date.split('/');
-      const itemDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-      return itemDate >= cutoffDate;
-    });
+  const handleStationSelect = async (stationName: string) => {
+    setSelectedStation(stationName);
+    await loadStationData(stationName);
   };
 
-  const getCurrentStationData = (): MeteoData[] => {
-    const rawData = selectedStation ? stationData[selectedStation] || [] : [];
-    return filterDataByTimePeriod(rawData);
+  const handleTimePeriodChange = async (newTimePeriod: string) => {
+    setTimePeriod(newTimePeriod);
+    if (selectedStation) {
+      await loadStationData(selectedStation);
+    }
   };
+
+  // Load stations on component mount
+  useEffect(() => {
+    loadStations();
+  }, []);
 
   return (
     <div className={isDarkMode ? "dark" : ""}>
@@ -100,7 +117,7 @@ export const Dashboard = () => {
               toggleTheme={toggleTheme}
               selectedStation={selectedStation}
               timePeriod={timePeriod}
-              onTimePeriodChange={setTimePeriod}
+              onTimePeriodChange={handleTimePeriodChange}
             />
             {currentView === "import" ? (
               <div className="flex-1 p-6">
@@ -109,9 +126,9 @@ export const Dashboard = () => {
             ) : (
               <DashboardContent 
                 selectedStation={selectedStation}
-                onStationSelect={setSelectedStation}
-                stationData={getCurrentStationData()}
-                availableStations={Object.keys(stationData)}
+                onStationSelect={handleStationSelect}
+                stationData={stationData}
+                availableStations={availableStations}
                 currentView={currentView}
                 timePeriod={timePeriod}
               />
