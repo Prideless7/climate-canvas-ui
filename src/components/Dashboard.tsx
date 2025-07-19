@@ -98,6 +98,14 @@ export const Dashboard = () => {
     }
   };
 
+  const handleAdvancedFilter = async (filterType: string, year?: number, month?: number) => {
+    setTimePeriod(filterType);
+    if (selectedStation) {
+      const data = await meteorologicalService.getStationDataByTimePeriod(selectedStation, filterType, year, month);
+      setStationData(data);
+    }
+  };
+
   // Load stations on component mount
   useEffect(() => {
     loadStations();
@@ -119,6 +127,7 @@ export const Dashboard = () => {
               selectedStation={selectedStation}
               timePeriod={timePeriod}
               onTimePeriodChange={handleTimePeriodChange}
+              onAdvancedFilter={handleAdvancedFilter}
             />
             {currentView === "import" ? (
               <div className="flex-1 p-6">

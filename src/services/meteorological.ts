@@ -111,52 +111,96 @@ export const meteorologicalService = {
     return transformedData;
   },
 
-  async getStationDataByTimePeriod(stationId: string, timePeriod: string): Promise<MeteoData[]> {
-    console.log('getStationDataByTimePeriod called with:', stationId, timePeriod);
-    const allData = await this.getStationData(stationId);
+  async getStationDataByTimePeriod(stationId: string, timePeriod: string, customYear?: number, customMonth?: number): Promise<MeteoData[]> {
+    console.log('getStationDataByTimePeriod called with:', stationId, timePeriod, customYear, customMonth);
     
-    console.log('getStationDataByTimePeriod received data:', allData.length, 'items');
-    
-    if (!allData.length) {
-      console.log('No data from getStationData, returning empty array');
-      return allData;
-    }
-    
+    // For database-level filtering, build the query with date filters
+    let query = supabase
+      .from('meteorological_readings')
+      .select(`
+        *,
+        stations!inner(name)
+      `)
+      .eq('stations.name', stationId)
+      .order('date', { ascending: true })
+      .order('time', { ascending: true });
+
     const now = new Date();
-    let cutoffDate: Date;
-    
+    let startDate: string | undefined;
+    let endDate: string | undefined;
+
     switch (timePeriod) {
       case "7d":
-        cutoffDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
         break;
       case "30d":
-        cutoffDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
         break;
       case "90d":
-        cutoffDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+        startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
         break;
       case "1y":
-        cutoffDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+        startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        break;
+      case "year":
+        if (customYear) {
+          startDate = `${customYear}-01-01`;
+          endDate = `${customYear}-12-31`;
+        }
+        break;
+      case "month":
+        if (customYear && customMonth) {
+          const monthStr = customMonth.toString().padStart(2, '0');
+          startDate = `${customYear}-${monthStr}-01`;
+          const lastDay = new Date(customYear, customMonth, 0).getDate();
+          endDate = `${customYear}-${monthStr}-${lastDay}`;
+        }
         break;
       case "all":
       default:
         console.log('Showing all data, no date filtering');
-        return allData;
+        break;
     }
+
+    // Apply date filters to the query
+    if (startDate && endDate) {
+      query = query.gte('date', startDate).lte('date', endDate);
+      console.log(`Filtering data between ${startDate} and ${endDate}`);
+    } else if (startDate) {
+      query = query.gte('date', startDate);
+      console.log(`Filtering data from ${startDate}`);
+    }
+
+    const { data, error } = await query.limit(1000);
+
+    if (error) {
+      console.error('Error fetching filtered meteorological data:', error);
+      return [];
+    }
+
+    console.log(`Found ${data?.length || 0} readings for station ${stationId} with filter ${timePeriod}`);
     
-    console.log('Filtering data from cutoff date:', cutoffDate);
-    
-    const filteredData = allData.filter(item => {
-      // Parse date in YYYY-MM-DD format from database
-      const itemDate = new Date(item.date);
-      const isValid = itemDate >= cutoffDate;
-      if (!isValid) {
-        console.log('Filtering out old data:', item.date, 'vs cutoff:', cutoffDate);
-      }
-      return isValid;
-    });
-    
-    console.log('Filtered data result:', filteredData.length, 'items after date filtering');
-    return filteredData;
+    if (!data || data.length === 0) {
+      console.warn(`No data found for station: ${stationId} with filter: ${timePeriod}`);
+      return [];
+    }
+
+    // Convert database format to MeteoData format
+    const transformedData = data.map((reading: any) => ({
+      date: reading.date,
+      time: reading.time,
+      temperature: reading.temperature || 0,
+      humidity: reading.humidity || 0,
+      precipitation: reading.precipitation || 0,
+      windSpeed: reading.wind_speed || 0,
+      windDirection: reading.wind_direction || 0,
+      pressure: reading.pressure || 0,
+      solarRadiation: reading.solar_radiation || 0,
+      eto: reading.eto || 0,
+      rainDuration: reading.rain_duration || 0
+    }));
+
+    console.log('Returning', transformedData.length, 'filtered records');
+    return transformedData;
   }
 };

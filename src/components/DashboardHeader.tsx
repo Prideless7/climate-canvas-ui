@@ -1,5 +1,5 @@
 
-import { Moon, Sun, Upload, Calendar, Filter } from "lucide-react";
+import { Moon, Sun, Upload, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { AdvancedFilters } from "./AdvancedFilters";
 
 interface DashboardHeaderProps {
   isDarkMode: boolean;
@@ -17,6 +18,7 @@ interface DashboardHeaderProps {
   selectedStation: string;
   timePeriod: string;
   onTimePeriodChange: (period: string) => void;
+  onAdvancedFilter: (filterType: string, year?: number, month?: number) => void;
 }
 
 const stationNames: Record<string, string> = {
@@ -27,7 +29,7 @@ const stationNames: Record<string, string> = {
   Ziros: "Ziros Station"
 };
 
-export const DashboardHeader = ({ isDarkMode, toggleTheme, selectedStation, timePeriod, onTimePeriodChange }: DashboardHeaderProps) => {
+export const DashboardHeader = ({ isDarkMode, toggleTheme, selectedStation, timePeriod, onTimePeriodChange, onAdvancedFilter }: DashboardHeaderProps) => {
   return (
     <header className="h-16 border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
       <div className="h-full px-4 flex items-center justify-between">
@@ -59,10 +61,10 @@ export const DashboardHeader = ({ isDarkMode, toggleTheme, selectedStation, time
             </SelectContent>
           </Select>
 
-          <Button variant="outline" size="sm">
-            <Filter className="w-4 h-4" />
-            Filters
-          </Button>
+          <AdvancedFilters 
+            onFilterChange={onAdvancedFilter}
+            currentFilter={timePeriod}
+          />
 
           <Button variant="outline" size="sm">
             <Upload className="w-4 h-4" />
