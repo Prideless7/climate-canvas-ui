@@ -8,6 +8,7 @@ import { CombinedChart } from "./charts/CombinedChart";
 import { MetricsOverview } from "./MetricsOverview";
 import { CreteMap } from "./CreteMap";
 import { PDFExportButtons } from "./PDFExportButtons";
+import { DatabaseView } from "./DatabaseView";
 import { MeteoData } from "./Dashboard";
 
 interface DashboardContentProps {
@@ -186,6 +187,15 @@ export const DashboardContent = ({ selectedStation, onStationSelect, stationData
               <CombinedChart data={stationData} detailed />
             </CardContent>
           </Card>
+        );
+      
+      case "database":
+        return (
+          <DatabaseView 
+            stationData={stationData}
+            selectedStation={selectedStation}
+            timePeriod={timePeriod}
+          />
         );
       
       default:
