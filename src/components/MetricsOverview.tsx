@@ -2,47 +2,76 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Thermometer, CloudRain, Sun, Droplets, TrendingUp, TrendingDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { MeteoData } from "./Dashboard";
 
-const metrics = [
-  {
-    title: "Avg Temperature",
-    value: "24.5°C",
-    change: "+2.1°C",
-    trend: "up",
-    icon: Thermometer,
-    color: "temperature",
-    bgColor: "bg-temperature/10",
-  },
-  {
-    title: "Total Rainfall",
-    value: "145.2mm",
-    change: "-12.8mm",
-    trend: "down",
-    icon: CloudRain,
-    color: "rainfall",
-    bgColor: "bg-rainfall/10",
-  },
-  {
-    title: "Solar Radiation",
-    value: "18.4 MJ/m²",
-    change: "+3.2 MJ/m²",
-    trend: "up",
-    icon: Sun,
-    color: "solar",
-    bgColor: "bg-solar/10",
-  },
-  {
-    title: "Avg Humidity",
-    value: "68.3%",
-    change: "+4.7%",
-    trend: "up",
-    icon: Droplets,
-    color: "humidity",
-    bgColor: "bg-humidity/10",
-  },
-];
+interface MetricsOverviewProps {
+  stationData: MeteoData[];
+}
 
-export const MetricsOverview = () => {
+const calculateMetrics = (data: MeteoData[]) => {
+  if (data.length === 0) {
+    return {
+      avgTemp: 0,
+      totalRainfall: 0,
+      avgSolarRadiation: 0,
+      avgHumidity: 0,
+    };
+  }
+
+  const avgTemp = data.reduce((sum, item) => sum + item.temperature, 0) / data.length;
+  const totalRainfall = data.reduce((sum, item) => sum + item.precipitation, 0);
+  const avgSolarRadiation = data.reduce((sum, item) => sum + item.solarRadiation, 0) / data.length;
+  const avgHumidity = data.reduce((sum, item) => sum + item.humidity, 0) / data.length;
+
+  return {
+    avgTemp: Number(avgTemp.toFixed(1)),
+    totalRainfall: Number(totalRainfall.toFixed(1)),
+    avgSolarRadiation: Number(avgSolarRadiation.toFixed(1)),
+    avgHumidity: Number(avgHumidity.toFixed(1)),
+  };
+};
+
+export const MetricsOverview = ({ stationData }: MetricsOverviewProps) => {
+  const stats = calculateMetrics(stationData);
+  
+  const metrics = [
+    {
+      title: "Avg Temperature",
+      value: stationData.length > 0 ? `${stats.avgTemp}°C` : "No data",
+      change: stationData.length > 0 ? `${stationData.length} records` : "Import data",
+      trend: "up",
+      icon: Thermometer,
+      color: "temperature",
+      bgColor: "bg-temperature/10",
+    },
+    {
+      title: "Total Rainfall",
+      value: stationData.length > 0 ? `${stats.totalRainfall}mm` : "No data",
+      change: stationData.length > 0 ? `${stationData.length} records` : "Import data",
+      trend: "down",
+      icon: CloudRain,
+      color: "rainfall",
+      bgColor: "bg-rainfall/10",
+    },
+    {
+      title: "Solar Radiation",
+      value: stationData.length > 0 ? `${stats.avgSolarRadiation} W/m²` : "No data",
+      change: stationData.length > 0 ? `${stationData.length} records` : "Import data",
+      trend: "up",
+      icon: Sun,
+      color: "solar",
+      bgColor: "bg-solar/10",
+    },
+    {
+      title: "Avg Humidity",
+      value: stationData.length > 0 ? `${stats.avgHumidity}%` : "No data",
+      change: stationData.length > 0 ? `${stationData.length} records` : "Import data",
+      trend: "up",
+      icon: Droplets,
+      color: "humidity",
+      bgColor: "bg-humidity/10",
+    },
+  ];
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {metrics.map((metric, index) => (

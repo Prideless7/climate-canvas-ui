@@ -7,19 +7,26 @@ import { SolarRadiationChart } from "./charts/SolarRadiationChart";
 import { CombinedChart } from "./charts/CombinedChart";
 import { MetricsOverview } from "./MetricsOverview";
 import { CreteMap } from "./CreteMap";
+import { MeteoData } from "./Dashboard";
 
 interface DashboardContentProps {
   selectedStation: string;
   onStationSelect: (stationId: string) => void;
+  stationData: MeteoData[];
+  availableStations: string[];
 }
 
-export const DashboardContent = ({ selectedStation, onStationSelect }: DashboardContentProps) => {
+export const DashboardContent = ({ selectedStation, onStationSelect, stationData, availableStations }: DashboardContentProps) => {
   return (
     <main className="flex-1 p-6 space-y-6 bg-gradient-to-br from-blue-50/50 via-green-50/30 to-yellow-50/20 dark:from-blue-950/20 dark:via-green-950/10 dark:to-yellow-950/10">
       {/* Station Selection Map */}
-      <CreteMap selectedStation={selectedStation} onStationSelect={onStationSelect} />
+      <CreteMap 
+        selectedStation={selectedStation} 
+        onStationSelect={onStationSelect}
+        availableStations={availableStations}
+      />
       
-      <MetricsOverview />
+      <MetricsOverview stationData={stationData} />
       
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList className="grid w-full grid-cols-5">
@@ -42,7 +49,7 @@ export const DashboardContent = ({ selectedStation, onStationSelect }: Dashboard
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <TemperatureChart />
+                <TemperatureChart data={stationData} />
               </CardContent>
             </Card>
 
@@ -56,7 +63,7 @@ export const DashboardContent = ({ selectedStation, onStationSelect }: Dashboard
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <RainfallChart />
+                <RainfallChart data={stationData} />
               </CardContent>
             </Card>
           </div>
@@ -71,7 +78,7 @@ export const DashboardContent = ({ selectedStation, onStationSelect }: Dashboard
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <CombinedChart />
+              <CombinedChart data={stationData} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -85,7 +92,7 @@ export const DashboardContent = ({ selectedStation, onStationSelect }: Dashboard
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <TemperatureChart detailed />
+              <TemperatureChart data={stationData} detailed />
             </CardContent>
           </Card>
         </TabsContent>
@@ -99,7 +106,7 @@ export const DashboardContent = ({ selectedStation, onStationSelect }: Dashboard
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <RainfallChart detailed />
+              <RainfallChart data={stationData} detailed />
             </CardContent>
           </Card>
         </TabsContent>
@@ -113,7 +120,7 @@ export const DashboardContent = ({ selectedStation, onStationSelect }: Dashboard
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <SolarRadiationChart />
+              <SolarRadiationChart data={stationData} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -127,7 +134,7 @@ export const DashboardContent = ({ selectedStation, onStationSelect }: Dashboard
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <CombinedChart detailed />
+              <CombinedChart data={stationData} detailed />
             </CardContent>
           </Card>
         </TabsContent>

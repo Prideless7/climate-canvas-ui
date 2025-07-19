@@ -1,30 +1,43 @@
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
-
-const temperatureData = [
-  { month: 'Jan', avgTemp: 18.2, maxTemp: 25.1, minTemp: 11.3 },
-  { month: 'Feb', avgTemp: 19.8, maxTemp: 27.2, minTemp: 12.4 },
-  { month: 'Mar', avgTemp: 22.1, maxTemp: 29.8, minTemp: 14.4 },
-  { month: 'Apr', avgTemp: 24.7, maxTemp: 32.1, minTemp: 17.3 },
-  { month: 'May', avgTemp: 26.9, maxTemp: 34.5, minTemp: 19.3 },
-  { month: 'Jun', avgTemp: 28.4, maxTemp: 36.2, minTemp: 20.6 },
-  { month: 'Jul', avgTemp: 29.1, maxTemp: 37.8, minTemp: 20.4 },
-  { month: 'Aug', avgTemp: 28.8, maxTemp: 37.2, minTemp: 20.4 },
-  { month: 'Sep', avgTemp: 26.7, maxTemp: 34.8, minTemp: 18.6 },
-  { month: 'Oct', avgTemp: 24.2, maxTemp: 31.5, minTemp: 16.9 },
-  { month: 'Nov', avgTemp: 21.3, maxTemp: 28.1, minTemp: 14.5 },
-  { month: 'Dec', avgTemp: 19.1, maxTemp: 25.8, minTemp: 12.4 },
-];
+import { MeteoData } from '../Dashboard';
 
 interface TemperatureChartProps {
+  data: MeteoData[];
   detailed?: boolean;
 }
 
-export const TemperatureChart = ({ detailed = false }: TemperatureChartProps) => {
+const transformData = (data: MeteoData[]) => {
+  if (data.length === 0) {
+    return [{ month: 'No data', avgTemp: 0, maxTemp: 0, minTemp: 0 }];
+  }
+
+  const monthlyData = data.reduce((acc, item) => {
+    const date = new Date(item.date.split('/').reverse().join('-'));
+    const month = date.toLocaleDateString('en', { month: 'short' });
+    
+    if (!acc[month]) {
+      acc[month] = { temps: [], month };
+    }
+    acc[month].temps.push(item.temperature);
+    return acc;
+  }, {} as Record<string, { temps: number[]; month: string }>);
+
+  return Object.values(monthlyData).map(({ month, temps }) => ({
+    month,
+    avgTemp: Number((temps.reduce((s, t) => s + t, 0) / temps.length).toFixed(1)),
+    maxTemp: Number(Math.max(...temps).toFixed(1)),
+    minTemp: Number(Math.min(...temps).toFixed(1))
+  }));
+};
+
+export const TemperatureChart = ({ data, detailed = false }: TemperatureChartProps) => {
+  const chartData = transformData(data);
+  
   if (detailed) {
     return (
       <ResponsiveContainer width="100%" height={400}>
-        <AreaChart data={temperatureData}>
+        <AreaChart data={chartData}>
           <defs>
             <linearGradient id="tempGradient" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="hsl(var(--temperature))" stopOpacity={0.3}/>
@@ -73,7 +86,7 @@ export const TemperatureChart = ({ detailed = false }: TemperatureChartProps) =>
 
   return (
     <ResponsiveContainer width="100%" height={300}>
-      <LineChart data={temperatureData}>
+      <LineChart data={chartData}>
         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
         <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" />
         <YAxis stroke="hsl(var(--muted-foreground))" />

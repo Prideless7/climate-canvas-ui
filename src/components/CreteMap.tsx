@@ -75,9 +75,11 @@ const meteorologicalStations: Station[] = [
 interface CreteMapProps {
   selectedStation: string;
   onStationSelect: (stationId: string) => void;
+  availableStations: string[];
 }
 
-export const CreteMap = ({ selectedStation, onStationSelect }: CreteMapProps) => {
+export const CreteMap = ({ selectedStation, onStationSelect, availableStations }: CreteMapProps) => {
+  const isStationAvailable = (stationId: string) => availableStations.includes(stationId);
   const [hoveredStation, setHoveredStation] = useState<string | null>(null);
 
   return (
@@ -185,7 +187,7 @@ export const CreteMap = ({ selectedStation, onStationSelect }: CreteMapProps) =>
                 size="sm"
                 className="justify-start h-auto p-3"
                 onClick={() => onStationSelect(station.id)}
-                disabled={!station.active}
+                disabled={!station.active || !isStationAvailable(station.id)}
               >
                 <div className="flex items-center gap-2 w-full">
                   <div className={`w-2 h-2 rounded-full ${station.active ? 'bg-green-500' : 'bg-gray-400'}`} />

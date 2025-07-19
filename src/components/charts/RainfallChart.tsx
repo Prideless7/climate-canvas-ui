@@ -1,29 +1,42 @@
 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-
-const rainfallData = [
-  { month: 'Jan', rainfall: 45.2, days: 8 },
-  { month: 'Feb', rainfall: 52.1, days: 9 },
-  { month: 'Mar', rainfall: 68.3, days: 12 },
-  { month: 'Apr', rainfall: 89.4, days: 14 },
-  { month: 'May', rainfall: 125.7, days: 16 },
-  { month: 'Jun', rainfall: 186.2, days: 19 },
-  { month: 'Jul', rainfall: 203.8, days: 21 },
-  { month: 'Aug', rainfall: 167.4, days: 18 },
-  { month: 'Sep', rainfall: 134.6, days: 15 },
-  { month: 'Oct', rainfall: 98.3, days: 13 },
-  { month: 'Nov', rainfall: 67.8, days: 10 },
-  { month: 'Dec', rainfall: 48.9, days: 7 },
-];
+import { MeteoData } from '../Dashboard';
 
 interface RainfallChartProps {
+  data: MeteoData[];
   detailed?: boolean;
 }
 
-export const RainfallChart = ({ detailed = false }: RainfallChartProps) => {
+const transformData = (data: MeteoData[]) => {
+  if (data.length === 0) {
+    return [{ month: 'No data', rainfall: 0, days: 0 }];
+  }
+
+  const monthlyData = data.reduce((acc, item) => {
+    const date = new Date(item.date.split('/').reverse().join('-'));
+    const month = date.toLocaleDateString('en', { month: 'short' });
+    
+    if (!acc[month]) {
+      acc[month] = { rainfall: 0, days: 0, month };
+    }
+    acc[month].rainfall += item.precipitation;
+    if (item.precipitation > 0) acc[month].days += 1;
+    return acc;
+  }, {} as Record<string, { rainfall: number; days: number; month: string }>);
+
+  return Object.values(monthlyData).map(({ month, rainfall, days }) => ({
+    month,
+    rainfall: Number(rainfall.toFixed(1)),
+    days
+  }));
+};
+
+export const RainfallChart = ({ data, detailed = false }: RainfallChartProps) => {
+  const chartData = transformData(data);
+  
   return (
     <ResponsiveContainer width="100%" height={detailed ? 400 : 300}>
-      <BarChart data={rainfallData}>
+      <BarChart data={chartData}>
         <defs>
           <linearGradient id="rainfallGradient" x1="0" y1="0" x2="0" y2="1">
             <stop offset="5%" stopColor="hsl(var(--rainfall))" stopOpacity={0.8}/>

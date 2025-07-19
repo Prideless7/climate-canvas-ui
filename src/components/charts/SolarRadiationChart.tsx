@@ -1,25 +1,40 @@
 
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { MeteoData } from '../Dashboard';
 
-const solarData = [
-  { month: 'Jan', radiation: 14.2, peakHours: 6.2, uvIndex: 7.1 },
-  { month: 'Feb', radiation: 16.8, peakHours: 7.1, uvIndex: 8.3 },
-  { month: 'Mar', radiation: 19.4, peakHours: 8.2, uvIndex: 9.2 },
-  { month: 'Apr', radiation: 21.7, peakHours: 9.1, uvIndex: 10.1 },
-  { month: 'May', radiation: 23.2, peakHours: 9.8, uvIndex: 10.8 },
-  { month: 'Jun', radiation: 24.1, peakHours: 10.2, uvIndex: 11.2 },
-  { month: 'Jul', radiation: 23.8, peakHours: 10.1, uvIndex: 11.0 },
-  { month: 'Aug', radiation: 22.6, peakHours: 9.4, uvIndex: 10.4 },
-  { month: 'Sep', radiation: 20.3, peakHours: 8.6, uvIndex: 9.3 },
-  { month: 'Oct', radiation: 17.9, peakHours: 7.8, uvIndex: 8.5 },
-  { month: 'Nov', radiation: 15.4, peakHours: 6.9, uvIndex: 7.7 },
-  { month: 'Dec', radiation: 13.8, peakHours: 6.3, uvIndex: 7.2 },
-];
+interface SolarRadiationChartProps {
+  data: MeteoData[];
+}
 
-export const SolarRadiationChart = () => {
+const transformData = (data: MeteoData[]) => {
+  if (data.length === 0) {
+    return [{ month: 'No data', radiation: 0, peakHours: 0, uvIndex: 0 }];
+  }
+
+  const monthlyData = data.reduce((acc, item) => {
+    const date = new Date(item.date.split('/').reverse().join('-'));
+    const month = date.toLocaleDateString('en', { month: 'short' });
+    
+    if (!acc[month]) {
+      acc[month] = { radiations: [], month };
+    }
+    acc[month].radiations.push(item.solarRadiation);
+    return acc;
+  }, {} as Record<string, { radiations: number[]; month: string }>);
+
+  return Object.values(monthlyData).map(({ month, radiations }) => ({
+    month,
+    radiation: Number((radiations.reduce((s, r) => s + r, 0) / radiations.length / 1000000 * 24).toFixed(1)), // Convert W/m² to MJ/m²
+    peakHours: Math.min(12, Number((radiations.reduce((s, r) => s + r, 0) / radiations.length / 100).toFixed(1))),
+    uvIndex: Math.min(11, Number((radiations.reduce((s, r) => s + r, 0) / radiations.length / 25).toFixed(1)))
+  }));
+};
+
+export const SolarRadiationChart = ({ data }: SolarRadiationChartProps) => {
+  const chartData = transformData(data);
   return (
     <ResponsiveContainer width="100%" height={400}>
-      <AreaChart data={solarData}>
+      <AreaChart data={chartData}>
         <defs>
           <linearGradient id="solarGradient" x1="0" y1="0" x2="0" y2="1">
             <stop offset="5%" stopColor="hsl(var(--solar))" stopOpacity={0.8}/>
