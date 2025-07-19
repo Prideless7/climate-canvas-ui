@@ -20,12 +20,11 @@ interface DashboardHeaderProps {
 }
 
 const stationNames: Record<string, string> = {
-  heraklion: "Heraklion Central",
-  chania: "Chania Airport",
-  rethymno: "Rethymno Port",
-  sitia: "Sitia Observatory",
-  ierapetra: "Ierapetra Coastal",
-  kissamos: "Kissamos Bay"
+  Tympaki: "Tympaki Station",
+  Potamies: "Potamies Station",
+  Doxaro: "Doxaro Station",
+  Pyrgos: "Pyrgos Station",
+  Ziros: "Ziros Station"
 };
 
 export const DashboardHeader = ({ isDarkMode, toggleTheme, selectedStation, timePeriod, onTimePeriodChange }: DashboardHeaderProps) => {
