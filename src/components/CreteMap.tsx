@@ -86,55 +86,47 @@ export const CreteMap = ({ selectedStation, onStationSelect, availableStations =
       </CardHeader>
       <CardContent>
         <div className="relative">
-          {/* SVG Map of Crete */}
-          <svg
-            viewBox="0 0 400 150"
-            className="w-full h-48 bg-gradient-to-br from-blue-50 to-green-50 dark:from-blue-950/20 dark:to-green-950/20 rounded-lg border"
-          >
-            {/* Crete Island Shape */}
-            <path
-              d="M50 80 C80 70, 120 65, 160 70 L200 75 C240 80, 280 85, 320 90 L350 95 C360 100, 365 110, 360 115 L350 120 C320 125, 280 120, 240 115 L200 110 C160 105, 120 100, 80 105 L50 100 C40 95, 40 85, 50 80 Z"
-              fill="hsl(var(--muted))"
-              stroke="hsl(var(--border))"
-              strokeWidth="2"
-              className="drop-shadow-sm"
+          {/* Crete Map with Image */}
+          <div className="relative w-full h-48 bg-gradient-to-br from-blue-50 to-green-50 dark:from-blue-950/20 dark:to-green-950/20 rounded-lg border overflow-hidden">
+            {/* Crete Island Image */}
+            <img 
+              src="/lovable-uploads/8c372d57-b569-484c-9466-2a6172bed9b2.png"
+              alt="Crete Island Map"
+              className="absolute inset-0 w-full h-full object-contain p-4 filter brightness-75 dark:brightness-50 dark:invert transition-all duration-300"
             />
             
-            {/* Water areas */}
-            <circle cx="100" cy="50" r="8" fill="hsl(var(--primary))" opacity="0.3" />
-            <circle cx="250" cy="40" r="6" fill="hsl(var(--primary))" opacity="0.3" />
-            
-            {/* Mountain ranges */}
-            <polygon points="150,85 160,75 170,85" fill="hsl(var(--muted-foreground))" opacity="0.2" />
-            <polygon points="220,90 235,78 250,90" fill="hsl(var(--muted-foreground))" opacity="0.2" />
-            
-            {/* Weather Stations */}
-            {meteorologicalStations.map((station) => (
-              <g key={station.id}>
-                <circle
-                  cx={station.coordinates.x * 4}
-                  cy={station.coordinates.y * 1.5}
-                  r={selectedStation === station.id ? "8" : hoveredStation === station.id ? "7" : "6"}
-                  fill={station.active ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))"}
-                  stroke={selectedStation === station.id ? "hsl(var(--ring))" : "white"}
-                  strokeWidth={selectedStation === station.id ? "3" : "2"}
-                  className="cursor-pointer transition-all duration-200 hover:opacity-80"
-                  onClick={() => onStationSelect(station.id)}
-                  onMouseEnter={() => setHoveredStation(station.id)}
-                  onMouseLeave={() => setHoveredStation(null)}
-                />
-                {station.active && (
+            {/* Weather Stations overlay */}
+            <svg
+              viewBox="0 0 400 150"
+              className="absolute inset-0 w-full h-full"
+            >
+              {meteorologicalStations.map((station) => (
+                <g key={station.id}>
                   <circle
                     cx={station.coordinates.x * 4}
                     cy={station.coordinates.y * 1.5}
-                    r="3"
-                    fill="white"
-                    className="pointer-events-none animate-pulse"
+                    r={selectedStation === station.id ? "8" : hoveredStation === station.id ? "7" : "6"}
+                    fill={station.active ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))"}
+                    stroke={selectedStation === station.id ? "hsl(var(--ring))" : "white"}
+                    strokeWidth={selectedStation === station.id ? "3" : "2"}
+                    className="cursor-pointer transition-all duration-200 hover:opacity-80"
+                    onClick={() => onStationSelect(station.id)}
+                    onMouseEnter={() => setHoveredStation(station.id)}
+                    onMouseLeave={() => setHoveredStation(null)}
                   />
-                )}
-              </g>
-            ))}
-          </svg>
+                  {station.active && (
+                    <circle
+                      cx={station.coordinates.x * 4}
+                      cy={station.coordinates.y * 1.5}
+                      r="3"
+                      fill="white"
+                      className="pointer-events-none animate-pulse"
+                    />
+                  )}
+                </g>
+              ))}
+            </svg>
+          </div>
 
           {/* Station Info Panel */}
           {hoveredStation && (
