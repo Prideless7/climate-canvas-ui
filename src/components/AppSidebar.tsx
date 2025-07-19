@@ -74,7 +74,13 @@ const dataItems = [
   },
 ];
 
-export function AppSidebar() {
+interface AppSidebarProps {
+  currentView: string;
+  onNavigationChange: (viewId: string) => void;
+  isDataImported: boolean;
+}
+
+export function AppSidebar({ currentView, onNavigationChange, isDataImported }: AppSidebarProps) {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
 
@@ -101,7 +107,11 @@ export function AppSidebar() {
             <SidebarMenu>
               {navigationItems.map((item) => (
                 <SidebarMenuItem key={item.id}>
-                  <SidebarMenuButton className="hover:bg-sidebar-accent">
+                  <SidebarMenuButton 
+                    className={`hover:bg-sidebar-accent ${currentView === item.id ? 'bg-sidebar-accent' : ''} ${!isDataImported && item.id !== 'overview' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    onClick={() => onNavigationChange(item.id)}
+                    disabled={!isDataImported && item.id !== 'overview'}
+                  >
                     <item.icon className="w-4 h-4" />
                     {!isCollapsed && <span>{item.title}</span>}
                   </SidebarMenuButton>
@@ -117,7 +127,10 @@ export function AppSidebar() {
             <SidebarMenu>
               {dataItems.map((item) => (
                 <SidebarMenuItem key={item.id}>
-                  <SidebarMenuButton className="hover:bg-sidebar-accent">
+                  <SidebarMenuButton 
+                    className={`hover:bg-sidebar-accent ${currentView === item.id ? 'bg-sidebar-accent' : ''}`}
+                    onClick={() => onNavigationChange(item.id)}
+                  >
                     <item.icon className="w-4 h-4" />
                     {!isCollapsed && <span>{item.title}</span>}
                   </SidebarMenuButton>

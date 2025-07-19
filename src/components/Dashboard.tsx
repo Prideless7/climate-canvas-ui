@@ -25,6 +25,7 @@ export const Dashboard = () => {
   const [stationData, setStationData] = useState<Record<string, MeteoData[]>>({});
   const [isDataImported, setIsDataImported] = useState(false);
   const [timePeriod, setTimePeriod] = useState("30d");
+  const [currentView, setCurrentView] = useState("import");
 
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
@@ -38,6 +39,15 @@ export const Dashboard = () => {
     }));
     setIsDataImported(true);
     setSelectedStation(stationName);
+    setCurrentView("overview");
+  };
+
+  const handleNavigationChange = (viewId: string) => {
+    if (viewId === "import") {
+      setCurrentView("import");
+    } else if (isDataImported) {
+      setCurrentView(viewId);
+    }
   };
 
   const filterDataByTimePeriod = (data: MeteoData[]): MeteoData[] => {
@@ -79,7 +89,11 @@ export const Dashboard = () => {
     <div className={isDarkMode ? "dark" : ""}>
       <SidebarProvider>
         <div className="min-h-screen flex w-full bg-background">
-          <AppSidebar />
+          <AppSidebar 
+            currentView={currentView}
+            onNavigationChange={handleNavigationChange}
+            isDataImported={isDataImported}
+          />
           <div className="flex-1 flex flex-col">
             <DashboardHeader 
               isDarkMode={isDarkMode} 
@@ -88,7 +102,7 @@ export const Dashboard = () => {
               timePeriod={timePeriod}
               onTimePeriodChange={setTimePeriod}
             />
-            {!isDataImported ? (
+            {currentView === "import" ? (
               <div className="flex-1 p-6">
                 <DataImport onDataImport={handleDataImport} />
               </div>
@@ -98,6 +112,7 @@ export const Dashboard = () => {
                 onStationSelect={setSelectedStation}
                 stationData={getCurrentStationData()}
                 availableStations={Object.keys(stationData)}
+                currentView={currentView}
               />
             )}
           </div>
