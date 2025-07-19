@@ -43,6 +43,8 @@ export const meteorologicalService = {
   },
 
   async getStationData(stationName: string): Promise<MeteoData[]> {
+    console.log('Fetching data for station:', stationName);
+    
     // Get the meteorological readings directly by station name
     const { data, error } = await supabase
       .from('meteorological_readings')
@@ -56,6 +58,12 @@ export const meteorologicalService = {
 
     if (error) {
       console.error('Error fetching meteorological data:', error);
+      return [];
+    }
+
+    console.log(`Found ${data?.length || 0} readings for station ${stationName}`);
+    if (!data || data.length === 0) {
+      console.warn(`No data found for station: ${stationName}`);
       return [];
     }
 
