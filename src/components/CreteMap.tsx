@@ -78,8 +78,8 @@ interface CreteMapProps {
   availableStations: string[];
 }
 
-export const CreteMap = ({ selectedStation, onStationSelect, availableStations }: CreteMapProps) => {
-  const isStationAvailable = (stationId: string) => availableStations.includes(stationId);
+export const CreteMap = ({ selectedStation, onStationSelect, availableStations = [] }: CreteMapProps) => {
+  const isStationAvailable = (stationId: string) => availableStations?.includes(stationId) || false;
   const [hoveredStation, setHoveredStation] = useState<string | null>(null);
 
   return (
