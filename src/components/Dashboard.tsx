@@ -24,6 +24,7 @@ export const Dashboard = () => {
   const [selectedStation, setSelectedStation] = useState("");
   const [stationData, setStationData] = useState<Record<string, MeteoData[]>>({});
   const [isDataImported, setIsDataImported] = useState(false);
+  const [timePeriod, setTimePeriod] = useState("30d");
 
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
@@ -39,8 +40,39 @@ export const Dashboard = () => {
     setSelectedStation(stationName);
   };
 
+  const filterDataByTimePeriod = (data: MeteoData[]): MeteoData[] => {
+    if (!data.length) return data;
+    
+    const now = new Date();
+    let cutoffDate: Date;
+    
+    switch (timePeriod) {
+      case "7d":
+        cutoffDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      case "30d":
+        cutoffDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        break;
+      case "90d":
+        cutoffDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+        break;
+      case "1y":
+        cutoffDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+        break;
+      default:
+        return data;
+    }
+    
+    return data.filter(item => {
+      const [day, month, year] = item.date.split('/');
+      const itemDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      return itemDate >= cutoffDate;
+    });
+  };
+
   const getCurrentStationData = (): MeteoData[] => {
-    return selectedStation ? stationData[selectedStation] || [] : [];
+    const rawData = selectedStation ? stationData[selectedStation] || [] : [];
+    return filterDataByTimePeriod(rawData);
   };
 
   return (
@@ -53,6 +85,8 @@ export const Dashboard = () => {
               isDarkMode={isDarkMode} 
               toggleTheme={toggleTheme}
               selectedStation={selectedStation}
+              timePeriod={timePeriod}
+              onTimePeriodChange={setTimePeriod}
             />
             {!isDataImported ? (
               <div className="flex-1 p-6">

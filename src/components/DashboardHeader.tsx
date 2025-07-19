@@ -15,6 +15,8 @@ interface DashboardHeaderProps {
   isDarkMode: boolean;
   toggleTheme: () => void;
   selectedStation: string;
+  timePeriod: string;
+  onTimePeriodChange: (period: string) => void;
 }
 
 const stationNames: Record<string, string> = {
@@ -26,7 +28,7 @@ const stationNames: Record<string, string> = {
   kissamos: "Kissamos Bay"
 };
 
-export const DashboardHeader = ({ isDarkMode, toggleTheme, selectedStation }: DashboardHeaderProps) => {
+export const DashboardHeader = ({ isDarkMode, toggleTheme, selectedStation, timePeriod, onTimePeriodChange }: DashboardHeaderProps) => {
   return (
     <header className="h-16 border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
       <div className="h-full px-4 flex items-center justify-between">
@@ -44,7 +46,7 @@ export const DashboardHeader = ({ isDarkMode, toggleTheme, selectedStation }: Da
         </div>
 
         <div className="flex items-center gap-2">
-          <Select defaultValue="30d">
+          <Select value={timePeriod} onValueChange={onTimePeriodChange}>
             <SelectTrigger className="w-32">
               <Calendar className="w-4 h-4" />
               <SelectValue placeholder="Period" />
