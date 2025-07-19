@@ -42,30 +42,21 @@ export const meteorologicalService = {
     return data || [];
   },
 
-  async getStationData(stationId: string): Promise<MeteoData[]> {
-    // First get the station by name
-    const { data: station, error: stationError } = await supabase
-      .from('stations')
-      .select('id')
-      .eq('name', stationId)
-      .single();
-
-    if (stationError) {
-      console.error('Error fetching station:', stationError);
-      return [];
-    }
-
-    // Then get the meteorological readings
+  async getStationData(stationName: string): Promise<MeteoData[]> {
+    // Get the meteorological readings directly by station name
     const { data, error } = await supabase
       .from('meteorological_readings')
-      .select('*')
-      .eq('station_id', station.id)
+      .select(`
+        *,
+        stations!inner(name)
+      `)
+      .eq('stations.name', stationName)
       .order('date', { ascending: true })
       .order('time', { ascending: true });
 
     if (error) {
       console.error('Error fetching meteorological data:', error);
-      throw new Error('Failed to fetch meteorological data');
+      return [];
     }
 
     // Convert database format to MeteoData format
