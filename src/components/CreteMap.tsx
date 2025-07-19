@@ -17,58 +17,49 @@ interface Station {
 
 const meteorologicalStations: Station[] = [
   {
-    id: "heraklion",
-    name: "Heraklion Central",
-    location: "Heraklion",
-    coordinates: { x: 60, y: 45 },
+    id: "Tympaki",
+    name: "Tympaki Station",
+    location: "Tympaki",
+    coordinates: { x: 55, y: 65 }, // South-central Crete
     active: true,
-    elevation: 39,
+    elevation: 15,
     lastUpdate: "2 min ago"
   },
   {
-    id: "chania",
-    name: "Chania Airport",
-    location: "Chania",
-    coordinates: { x: 20, y: 35 },
+    id: "Potamies",
+    name: "Potamies Station", 
+    location: "Potamies",
+    coordinates: { x: 75, y: 35 }, // Northeast Crete
     active: true,
-    elevation: 151,
-    lastUpdate: "5 min ago"
-  },
-  {
-    id: "rethymno",
-    name: "Rethymno Port",
-    location: "Rethymno",
-    coordinates: { x: 40, y: 30 },
-    active: true,
-    elevation: 12,
+    elevation: 120,
     lastUpdate: "3 min ago"
   },
   {
-    id: "sitia",
-    name: "Sitia Observatory",
-    location: "Sitia",
-    coordinates: { x: 85, y: 40 },
+    id: "Pyrgos",
+    name: "Pyrgos Station",
+    location: "Pyrgos",
+    coordinates: { x: 30, y: 50 }, // Western Crete
     active: true,
-    elevation: 78,
+    elevation: 85,
     lastUpdate: "1 min ago"
   },
   {
-    id: "ierapetra",
-    name: "Ierapetra Coastal",
-    location: "Ierapetra",
-    coordinates: { x: 75, y: 60 },
+    id: "Doxaro",
+    name: "Doxaro Station",
+    location: "Doxaro", 
+    coordinates: { x: 85, y: 55 }, // Eastern Crete
     active: true,
-    elevation: 5,
+    elevation: 210,
     lastUpdate: "4 min ago"
   },
   {
-    id: "kissamos",
-    name: "Kissamos Bay",
-    location: "Kissamos",
-    coordinates: { x: 15, y: 25 },
-    active: false,
-    elevation: 25,
-    lastUpdate: "2 hours ago"
+    id: "Ziros",
+    name: "Ziros Station",
+    location: "Ziros",
+    coordinates: { x: 90, y: 40 }, // Far eastern Crete
+    active: true,
+    elevation: 95,
+    lastUpdate: "2 min ago"
   }
 ];
 
