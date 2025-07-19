@@ -19,6 +19,7 @@ export interface MeteoData {
   windDirection: number;
   pressure: number;
   eto: number;
+  rainDuration: number;
 }
 
 export const Dashboard = () => {
