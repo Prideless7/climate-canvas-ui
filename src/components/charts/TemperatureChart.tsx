@@ -8,27 +8,63 @@ interface TemperatureChartProps {
 }
 
 const transformData = (data: MeteoData[]) => {
+  console.log('TemperatureChart transformData received data:', data.length, 'items');
+  console.log('Sample data item:', data[0]);
+  
   if (data.length === 0) {
+    console.log('No data available for temperature chart');
     return [{ month: 'No data', avgTemp: 0, maxTemp: 0, minTemp: 0 }];
   }
 
   const monthlyData = data.reduce((acc, item) => {
-    const date = new Date(item.date.split('/').reverse().join('-'));
+    // Handle multiple date formats
+    let date;
+    if (typeof item.date === 'string') {
+      // Try different date formats
+      if (item.date.includes('/')) {
+        // Try DD/MM/YYYY format first
+        const parts = item.date.split('/');
+        if (parts.length === 3) {
+          date = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+        }
+      } else if (item.date.includes('-')) {
+        // Try YYYY-MM-DD format
+        date = new Date(item.date);
+      }
+    } else {
+      date = new Date(item.date);
+    }
+    
+    // Validate date
+    if (!date || isNaN(date.getTime())) {
+      console.warn('Invalid date:', item.date);
+      return acc;
+    }
+    
     const month = date.toLocaleDateString('en', { month: 'short' });
     
     if (!acc[month]) {
       acc[month] = { temps: [], month };
     }
-    acc[month].temps.push(item.temperature);
+    
+    // Ensure temperature is a number
+    const temp = Number(item.temperature);
+    if (!isNaN(temp)) {
+      acc[month].temps.push(temp);
+    }
+    
     return acc;
   }, {} as Record<string, { temps: number[]; month: string }>);
 
-  return Object.values(monthlyData).map(({ month, temps }) => ({
+  const result = Object.values(monthlyData).map(({ month, temps }) => ({
     month,
     avgTemp: Number((temps.reduce((s, t) => s + t, 0) / temps.length).toFixed(1)),
     maxTemp: Number(Math.max(...temps).toFixed(1)),
     minTemp: Number(Math.min(...temps).toFixed(1))
   }));
+  
+  console.log('Transformed temperature data:', result);
+  return result;
 };
 
 export const TemperatureChart = ({ data, detailed = false }: TemperatureChartProps) => {
