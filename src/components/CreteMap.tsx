@@ -67,10 +67,12 @@ interface CreteMapProps {
   selectedStation: string;
   onStationSelect: (stationId: string) => void;
   availableStations: string[];
+  stationsWithData?: string[];
 }
 
-export const CreteMap = ({ selectedStation, onStationSelect, availableStations = [] }: CreteMapProps) => {
+export const CreteMap = ({ selectedStation, onStationSelect, availableStations = [], stationsWithData = [] }: CreteMapProps) => {
   const isStationAvailable = (stationId: string) => availableStations?.includes(stationId) || false;
+  const hasStationData = (stationId: string) => stationsWithData?.includes(stationId) || false;
   const [hoveredStation, setHoveredStation] = useState<string | null>(null);
 
   return (
@@ -106,11 +108,15 @@ export const CreteMap = ({ selectedStation, onStationSelect, availableStations =
                     cx={station.coordinates.x * 4}
                     cy={station.coordinates.y * 1.5}
                     r={selectedStation === station.id ? "8" : hoveredStation === station.id ? "7" : "6"}
-                    fill={station.active ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))"}
+                    fill={
+                      hasStationData(station.id) 
+                        ? (station.active ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))") 
+                        : "hsl(var(--muted-foreground)/0.5)"
+                    }
                     stroke={selectedStation === station.id ? "hsl(var(--ring))" : "white"}
                     strokeWidth={selectedStation === station.id ? "3" : "2"}
-                    className="cursor-pointer transition-all duration-200 hover:opacity-80"
-                    onClick={() => onStationSelect(station.id)}
+                    className={hasStationData(station.id) ? "cursor-pointer transition-all duration-200 hover:opacity-80" : "cursor-not-allowed opacity-50"}
+                    onClick={() => hasStationData(station.id) && onStationSelect(station.id)}
                     onMouseEnter={() => setHoveredStation(station.id)}
                     onMouseLeave={() => setHoveredStation(null)}
                   />
@@ -169,8 +175,8 @@ export const CreteMap = ({ selectedStation, onStationSelect, availableStations =
                 variant={selectedStation === station.id ? "default" : "outline"}
                 size="sm"
                 className="justify-start h-auto p-3"
-                onClick={() => onStationSelect(station.id)}
-                disabled={!station.active || !isStationAvailable(station.id)}
+                onClick={() => hasStationData(station.id) && onStationSelect(station.id)}
+                disabled={!station.active || !isStationAvailable(station.id) || !hasStationData(station.id)}
               >
                 <div className="flex items-center gap-2 w-full">
                   <div className={`w-2 h-2 rounded-full ${station.active ? 'bg-green-500' : 'bg-gray-400'}`} />

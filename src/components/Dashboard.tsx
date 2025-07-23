@@ -27,6 +27,7 @@ export const Dashboard = () => {
   const [selectedStation, setSelectedStation] = useState("");
   const [stationData, setStationData] = useState<MeteoData[]>([]);
   const [availableStations, setAvailableStations] = useState<string[]>([]);
+  const [stationsWithData, setStationsWithData] = useState<string[]>([]);
   const [isDataImported, setIsDataImported] = useState(false);
   const [timePeriod, setTimePeriod] = useState("all");
   const [currentView, setCurrentView] = useState("import");
@@ -43,6 +44,20 @@ export const Dashboard = () => {
       const stations = await meteorologicalService.getStations();
       const stationNames = stations.map(s => s.name);
       setAvailableStations(stationNames);
+      
+      // Check which stations have data
+      const stationsWithDataPromises = stationNames.map(async (stationName) => {
+        try {
+          const data = await meteorologicalService.getStationDataByTimePeriod(stationName, "all");
+          return data.length > 0 ? stationName : null;
+        } catch {
+          return null;
+        }
+      });
+      
+      const stationsWithDataResults = await Promise.all(stationsWithDataPromises);
+      const stationsWithDataList = stationsWithDataResults.filter(Boolean) as string[];
+      setStationsWithData(stationsWithDataList);
       
       if (stationNames.length > 0) {
         setIsDataImported(true);
@@ -107,7 +122,8 @@ export const Dashboard = () => {
   };
 
   const handleDataCleared = async () => {
-    // Reload current station data after clearing
+    // Reload stations with data list and current station data after clearing
+    await loadStations();
     if (selectedStation) {
       await loadStationData(selectedStation);
     }
@@ -149,6 +165,7 @@ export const Dashboard = () => {
                 availableStations={availableStations}
                 currentView={currentView}
                 timePeriod={timePeriod}
+                stationsWithData={stationsWithData}
               />
             )}
           </div>

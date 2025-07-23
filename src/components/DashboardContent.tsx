@@ -18,9 +18,10 @@ interface DashboardContentProps {
   availableStations: string[];
   currentView: string;
   timePeriod: string;
+  stationsWithData: string[];
 }
 
-export const DashboardContent = ({ selectedStation, onStationSelect, stationData, availableStations, currentView, timePeriod }: DashboardContentProps) => {
+export const DashboardContent = ({ selectedStation, onStationSelect, stationData, availableStations, currentView, timePeriod, stationsWithData }: DashboardContentProps) => {
   const renderContent = () => {
     switch (currentView) {
       case "overview":
@@ -30,6 +31,7 @@ export const DashboardContent = ({ selectedStation, onStationSelect, stationData
               selectedStation={selectedStation} 
               onStationSelect={onStationSelect}
               availableStations={availableStations}
+              stationsWithData={stationsWithData}
             />
             <MetricsOverview stationData={stationData} />
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -205,6 +207,7 @@ export const DashboardContent = ({ selectedStation, onStationSelect, stationData
               selectedStation={selectedStation} 
               onStationSelect={onStationSelect}
               availableStations={availableStations}
+              stationsWithData={stationsWithData}
             />
             <MetricsOverview stationData={stationData} />
           </>
