@@ -106,6 +106,13 @@ export const Dashboard = () => {
     }
   };
 
+  const handleDataCleared = async () => {
+    // Reload current station data after clearing
+    if (selectedStation) {
+      await loadStationData(selectedStation);
+    }
+  };
+
   // Load stations on component mount
   useEffect(() => {
     loadStations();
@@ -128,6 +135,7 @@ export const Dashboard = () => {
               timePeriod={timePeriod}
               onTimePeriodChange={handleTimePeriodChange}
               onAdvancedFilter={handleAdvancedFilter}
+              onDataCleared={handleDataCleared}
             />
             {currentView === "import" ? (
               <div className="flex-1 p-6">

@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { AdvancedFilters } from "./AdvancedFilters";
+import { ClearDataButtons } from "./ClearDataButtons";
 
 interface DashboardHeaderProps {
   isDarkMode: boolean;
@@ -19,6 +20,7 @@ interface DashboardHeaderProps {
   timePeriod: string;
   onTimePeriodChange: (period: string) => void;
   onAdvancedFilter: (filterType: string, year?: number, month?: number) => void;
+  onDataCleared: () => void;
 }
 
 const stationNames: Record<string, string> = {
@@ -29,7 +31,7 @@ const stationNames: Record<string, string> = {
   Ziros: "Ziros Station"
 };
 
-export const DashboardHeader = ({ isDarkMode, toggleTheme, selectedStation, timePeriod, onTimePeriodChange, onAdvancedFilter }: DashboardHeaderProps) => {
+export const DashboardHeader = ({ isDarkMode, toggleTheme, selectedStation, timePeriod, onTimePeriodChange, onAdvancedFilter, onDataCleared }: DashboardHeaderProps) => {
   return (
     <header className="h-16 border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
       <div className="h-full px-4 flex items-center justify-between">
@@ -64,6 +66,11 @@ export const DashboardHeader = ({ isDarkMode, toggleTheme, selectedStation, time
           <AdvancedFilters 
             onFilterChange={onAdvancedFilter}
             currentFilter={timePeriod}
+          />
+
+          <ClearDataButtons
+            selectedStation={selectedStation}
+            onDataCleared={onDataCleared}
           />
 
           <Button variant="outline" size="sm">
