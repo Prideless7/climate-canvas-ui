@@ -26,6 +26,18 @@ export default function Auth() {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Initialize default users on first load
+    const initializeDefaultUsers = async () => {
+      try {
+        await supabase.functions.invoke('seed-default-users');
+      } catch (error) {
+        // Silently fail if already initialized or error occurs
+        console.log('Default users initialization:', error);
+      }
+    };
+
+    initializeDefaultUsers();
+
     // Check if user is already logged in
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
@@ -158,6 +170,13 @@ export default function Auth() {
               ? "Enter your credentials to access the dashboard"
               : "Sign up to create a new account"}
           </CardDescription>
+          {isLogin && (
+            <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-md mt-2">
+              <p className="font-semibold mb-1">Default accounts:</p>
+              <p>Admin: username "admin" / password "admin"</p>
+              <p>User: username "user" / password "user"</p>
+            </div>
+          )}
         </CardHeader>
         <CardContent>
           <form onSubmit={isLogin ? handleLogin : handleSignup} className="space-y-4">
