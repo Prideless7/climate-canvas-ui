@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { MeteoData } from "./Dashboard";
 import { format } from "date-fns";
+import { useAuth } from "@/hooks/useAuth";
 
 interface DatabaseViewProps {
   stationData: MeteoData[];
@@ -13,8 +14,25 @@ interface DatabaseViewProps {
 }
 
 export const DatabaseView = ({ stationData, selectedStation, timePeriod }: DatabaseViewProps) => {
+  const { isAdmin } = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
+  
+  // Only admins can view database
+  if (!isAdmin) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle>Access Restricted</CardTitle>
+            <CardDescription>
+              Only administrators can access the database view.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    );
+  }
   
   const totalPages = Math.ceil(stationData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;

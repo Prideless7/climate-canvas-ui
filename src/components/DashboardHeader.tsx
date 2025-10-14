@@ -1,5 +1,5 @@
 
-import { Moon, Sun, Upload, Calendar } from "lucide-react";
+import { Moon, Sun, Upload, Calendar, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
@@ -12,6 +12,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { AdvancedFilters } from "./AdvancedFilters";
 import { ClearDataButtons } from "./ClearDataButtons";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 interface DashboardHeaderProps {
   isDarkMode: boolean;
@@ -32,6 +35,19 @@ const stationNames: Record<string, string> = {
 };
 
 export const DashboardHeader = ({ isDarkMode, toggleTheme, selectedStation, timePeriod, onTimePeriodChange, onAdvancedFilter, onDataCleared }: DashboardHeaderProps) => {
+  const { user, isAdmin, signOut } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    await signOut();
+    toast({
+      title: "Logged out",
+      description: "You have been successfully logged out.",
+    });
+    navigate("/auth");
+  };
+
   return (
     <header className="h-16 border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
       <div className="h-full px-4 flex items-center justify-between">
@@ -90,6 +106,24 @@ export const DashboardHeader = ({ isDarkMode, toggleTheme, selectedStation, time
               <Moon className="w-4 h-4" />
             )}
           </Button>
+
+          <div className="flex items-center gap-2 ml-2 border-l pl-2">
+            {user && (
+              <span className="text-sm text-muted-foreground">
+                {user.user_metadata?.username || "User"}
+                {isAdmin && " (Admin)"}
+              </span>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleLogout}
+              className="p-2"
+              title="Logout"
+            >
+              <LogOut className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </div>
     </header>

@@ -7,16 +7,34 @@ import { Upload, FileText, MapPin } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { MeteoData } from "./Dashboard";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 interface DataImportProps {
   onDataImport: (stationName: string) => void;
 }
 
 export const DataImport = ({ onDataImport }: DataImportProps) => {
+  const { isAdmin } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedStation, setSelectedStation] = useState<string>("");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const { toast } = useToast();
+
+  // Only admins can import data
+  if (!isAdmin) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle>Access Restricted</CardTitle>
+            <CardDescription>
+              Only administrators can import meteorological data.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    );
+  }
 
   const availableStations = [
     { id: "Tympaki", name: "Tympaki Station", location: "Tympaki" },

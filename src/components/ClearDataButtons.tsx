@@ -21,6 +21,7 @@ import {
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 interface ClearDataButtonsProps {
   selectedStation: string;
@@ -38,6 +39,12 @@ const stationNames: Record<string, string> = {
 export const ClearDataButtons = ({ selectedStation, onDataCleared }: ClearDataButtonsProps) => {
   const [isClearing, setIsClearing] = useState(false);
   const { toast } = useToast();
+  const { isAdmin } = useAuth();
+
+  // Only admins can clear data
+  if (!isAdmin) {
+    return null;
+  }
 
   const clearStationData = async () => {
     setIsClearing(true);
