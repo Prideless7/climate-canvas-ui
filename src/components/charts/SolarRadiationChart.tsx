@@ -29,12 +29,15 @@ const transformData = (data: MeteoData[]) => {
     return acc;
   }, {} as Record<string, { radiations: number[]; month: string }>);
 
-  const result = Object.values(monthlyData).map(({ month, radiations }) => ({
-    month,
-    radiation: Number((radiations.reduce((s, r) => s + r, 0) / radiations.length / 1000000 * 24).toFixed(1)), // Convert W/m² to MJ/m²
-    peakHours: Math.min(12, Number((radiations.reduce((s, r) => s + r, 0) / radiations.length / 100).toFixed(1))),
-    uvIndex: Math.min(11, Number((radiations.reduce((s, r) => s + r, 0) / radiations.length / 25).toFixed(1)))
-  }));
+  const result = Object.values(monthlyData).map(({ month, radiations }) => {
+    const avgRadiation = radiations.reduce((s, r) => s + r, 0) / radiations.length;
+    return {
+      month,
+      radiation: Number((avgRadiation * 0.0864).toFixed(1)), // Convert W/m² to MJ/m²/day
+      peakHours: Math.min(12, Number((avgRadiation / 100).toFixed(1))),
+      uvIndex: Math.min(11, Number((avgRadiation / 25).toFixed(1)))
+    };
+  });
   
   console.log('SolarRadiationChart - Transformed data:', result);
   return result;
