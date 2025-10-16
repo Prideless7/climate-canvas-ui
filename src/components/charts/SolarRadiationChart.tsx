@@ -12,7 +12,10 @@ const transformData = (data: MeteoData[]) => {
   }
 
   const monthlyData = data.reduce((acc, item) => {
-    const date = new Date(item.date.split('/').reverse().join('-'));
+    // Handle both YYYY-MM-DD and DD/MM/YYYY formats
+    const date = item.date.includes('/') 
+      ? new Date(item.date.split('/').reverse().join('-'))
+      : new Date(item.date);
     const month = date.toLocaleDateString('en', { month: 'short' });
     
     if (!acc[month]) {
