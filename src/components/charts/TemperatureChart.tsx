@@ -88,32 +88,35 @@ export const TemperatureChart = ({ data, detailed = false }: TemperatureChartPro
               backgroundColor: 'hsl(var(--card))', 
               border: '1px solid hsl(var(--border))',
               borderRadius: '6px'
-            }} 
+            }}
+            content={({ active, payload }) => {
+              if (active && payload && payload.length) {
+                const data = payload[0].payload;
+                return (
+                  <div style={{
+                    backgroundColor: 'hsl(var(--card))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '6px',
+                    padding: '8px 12px'
+                  }}>
+                    <p style={{ margin: 0, fontWeight: 'bold', marginBottom: '4px' }}>{data.month}</p>
+                    <p style={{ margin: 0, color: 'hsl(var(--temperature))' }}>Avg: {data.avgTemp}°C</p>
+                    <p style={{ margin: 0, fontSize: '0.9em', opacity: 0.8 }}>Max: {data.maxTemp}°C</p>
+                    <p style={{ margin: 0, fontSize: '0.9em', opacity: 0.8 }}>Min: {data.minTemp}°C</p>
+                  </div>
+                );
+              }
+              return null;
+            }}
           />
           <Area
             type="monotone"
-            dataKey="maxTemp"
-            stroke="hsl(var(--temperature))"
-            fill="url(#tempGradient)"
-            strokeWidth={2}
-            name="Max Temperature (°C)"
-          />
-          <Line
-            type="monotone"
             dataKey="avgTemp"
             stroke="hsl(var(--temperature))"
+            fill="url(#tempGradient)"
             strokeWidth={3}
-            name="Avg Temperature (°C)"
+            name="avgTemp"
             dot={{ fill: 'hsl(var(--temperature))', strokeWidth: 2, r: 4 }}
-          />
-          <Line
-            type="monotone"
-            dataKey="minTemp"
-            stroke="hsl(var(--temperature))"
-            strokeWidth={2}
-            strokeDasharray="5 5"
-            name="Min Temperature (°C)"
-            dot={{ fill: 'hsl(var(--temperature))', strokeWidth: 2, r: 3 }}
           />
         </AreaChart>
       </ResponsiveContainer>
@@ -122,7 +125,13 @@ export const TemperatureChart = ({ data, detailed = false }: TemperatureChartPro
 
   return (
     <ResponsiveContainer width="100%" height={300}>
-      <LineChart data={chartData}>
+      <AreaChart data={chartData}>
+        <defs>
+          <linearGradient id="tempGradientSimple" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="hsl(var(--temperature))" stopOpacity={0.8}/>
+            <stop offset="95%" stopColor="hsl(var(--temperature))" stopOpacity={0.2}/>
+          </linearGradient>
+        </defs>
         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
         <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" />
         <YAxis stroke="hsl(var(--muted-foreground))" />
@@ -131,17 +140,36 @@ export const TemperatureChart = ({ data, detailed = false }: TemperatureChartPro
             backgroundColor: 'hsl(var(--card))', 
             border: '1px solid hsl(var(--border))',
             borderRadius: '6px'
-          }} 
+          }}
+          content={({ active, payload }) => {
+            if (active && payload && payload.length) {
+              const data = payload[0].payload;
+              return (
+                <div style={{
+                  backgroundColor: 'hsl(var(--card))',
+                  border: '1px solid hsl(var(--border))',
+                  borderRadius: '6px',
+                  padding: '8px 12px'
+                }}>
+                  <p style={{ margin: 0, fontWeight: 'bold', marginBottom: '4px' }}>{data.month}</p>
+                  <p style={{ margin: 0, color: 'hsl(var(--temperature))' }}>Avg: {data.avgTemp}°C</p>
+                  <p style={{ margin: 0, fontSize: '0.9em', opacity: 0.8 }}>Max: {data.maxTemp}°C</p>
+                  <p style={{ margin: 0, fontSize: '0.9em', opacity: 0.8 }}>Min: {data.minTemp}°C</p>
+                </div>
+              );
+            }
+            return null;
+          }}
         />
-        <Line
+        <Area
           type="monotone"
           dataKey="avgTemp"
           stroke="hsl(var(--temperature))"
+          fill="url(#tempGradientSimple)"
           strokeWidth={3}
           name="Temperature (°C)"
-          dot={{ fill: 'hsl(var(--temperature))', strokeWidth: 2, r: 4 }}
         />
-      </LineChart>
+      </AreaChart>
     </ResponsiveContainer>
   );
 };
