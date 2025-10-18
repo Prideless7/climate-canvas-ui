@@ -55,7 +55,12 @@ export const HumidityChart = ({ data, detailed = false }: HumidityChartProps) =>
               border: '1px solid hsl(var(--border))',
               borderRadius: '6px'
             }}
-            formatter={(value) => [`${value}%`, '']}
+            formatter={(value, name) => [
+              `${value}%`,
+              name === 'maxHumidity' ? 'Max Humidity' : 
+              name === 'avgHumidity' ? 'Avg Humidity' : 
+              'Min Humidity'
+            ]}
           />
           <Area
             type="monotone"
