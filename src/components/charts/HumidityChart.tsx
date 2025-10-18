@@ -55,37 +55,34 @@ export const HumidityChart = ({ data, detailed = false }: HumidityChartProps) =>
               border: '1px solid hsl(var(--border))',
               borderRadius: '6px'
             }}
-            formatter={(value, name) => [
-              `${value}%`,
-              name === 'maxHumidity' ? 'Max Humidity' : 
-              name === 'avgHumidity' ? 'Avg Humidity' : 
-              'Min Humidity'
-            ]}
+            content={({ active, payload }) => {
+              if (active && payload && payload.length) {
+                const data = payload[0].payload;
+                return (
+                  <div style={{
+                    backgroundColor: 'hsl(var(--card))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '6px',
+                    padding: '8px 12px'
+                  }}>
+                    <p style={{ margin: 0, fontWeight: 'bold', marginBottom: '4px' }}>{data.month}</p>
+                    <p style={{ margin: 0, color: 'hsl(var(--humidity))' }}>Avg: {data.avgHumidity}%</p>
+                    <p style={{ margin: 0, fontSize: '0.9em', opacity: 0.8 }}>Max: {data.maxHumidity}%</p>
+                    <p style={{ margin: 0, fontSize: '0.9em', opacity: 0.8 }}>Min: {data.minHumidity}%</p>
+                  </div>
+                );
+              }
+              return null;
+            }}
           />
           <Area
             type="monotone"
-            dataKey="maxHumidity"
-            stroke="hsl(var(--humidity))"
-            fill="url(#humidityGradient)"
-            strokeWidth={2}
-            name="Max Humidity (%)"
-          />
-          <Line
-            type="monotone"
             dataKey="avgHumidity"
             stroke="hsl(var(--humidity))"
+            fill="url(#humidityGradient)"
             strokeWidth={3}
-            name="Avg Humidity (%)"
+            name="avgHumidity"
             dot={{ fill: 'hsl(var(--humidity))', strokeWidth: 2, r: 4 }}
-          />
-          <Line
-            type="monotone"
-            dataKey="minHumidity"
-            stroke="hsl(var(--humidity))"
-            strokeWidth={2}
-            strokeDasharray="5 5"
-            name="Min Humidity (%)"
-            dot={{ fill: 'hsl(var(--humidity))', strokeWidth: 2, r: 3 }}
           />
         </AreaChart>
       </ResponsiveContainer>
@@ -110,7 +107,25 @@ export const HumidityChart = ({ data, detailed = false }: HumidityChartProps) =>
             border: '1px solid hsl(var(--border))',
             borderRadius: '6px'
           }}
-          formatter={(value) => [`${value}%`, 'Humidity']}
+          content={({ active, payload }) => {
+            if (active && payload && payload.length) {
+              const data = payload[0].payload;
+              return (
+                <div style={{
+                  backgroundColor: 'hsl(var(--card))',
+                  border: '1px solid hsl(var(--border))',
+                  borderRadius: '6px',
+                  padding: '8px 12px'
+                }}>
+                  <p style={{ margin: 0, fontWeight: 'bold', marginBottom: '4px' }}>{data.month}</p>
+                  <p style={{ margin: 0, color: 'hsl(var(--humidity))' }}>Avg: {data.avgHumidity}%</p>
+                  <p style={{ margin: 0, fontSize: '0.9em', opacity: 0.8 }}>Max: {data.maxHumidity}%</p>
+                  <p style={{ margin: 0, fontSize: '0.9em', opacity: 0.8 }}>Min: {data.minHumidity}%</p>
+                </div>
+              );
+            }
+            return null;
+          }}
         />
         <Area
           type="monotone"
