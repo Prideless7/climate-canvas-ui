@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TemperatureChart } from "./charts/TemperatureChart";
 import { RainfallChart } from "./charts/RainfallChart";
 import { SolarRadiationChart } from "./charts/SolarRadiationChart";
+import { HumidityChart } from "./charts/HumidityChart";
 import { CombinedChart } from "./charts/CombinedChart";
 import { MetricsOverview } from "./MetricsOverview";
 import { CreteMap } from "./CreteMap";
@@ -143,11 +144,11 @@ export const DashboardContent = ({ selectedStation, onStationSelect, stationData
       
       case "humidity":
         return (
-          <Card className="border-primary/20" id="humidity-chart-container">
+          <Card className="border-humidity/20" id="humidity-chart-container">
             <CardHeader>
               <div className="flex justify-between items-center">
                 <div>
-                  <CardTitle>Humidity Analysis</CardTitle>
+                  <CardTitle className="text-humidity">Humidity Analysis</CardTitle>
                   <CardDescription>
                     Relative humidity patterns and variations
                   </CardDescription>
@@ -161,7 +162,7 @@ export const DashboardContent = ({ selectedStation, onStationSelect, stationData
               </div>
             </CardHeader>
             <CardContent>
-              <CombinedChart data={stationData} />
+              <HumidityChart data={stationData} detailed />
             </CardContent>
           </Card>
         );
