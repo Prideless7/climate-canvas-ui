@@ -117,11 +117,8 @@ export const meteorologicalService = {
     // For database-level filtering, build the query with date filters
     let query = supabase
       .from('meteorological_readings')
-      .select(`
-        *,
-        stations!inner(name)
-      `)
-      .eq('stations.name', stationId)
+      .select('*')
+      .eq('station_id', stationId)
       .order('date', { ascending: true })
       .order('time', { ascending: true });
 
