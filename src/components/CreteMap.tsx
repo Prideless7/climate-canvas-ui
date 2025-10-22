@@ -81,12 +81,16 @@ interface CreteMapProps {
 }
 
 // Create custom marker icons
-const createCustomIcon = (color: string, isSelected: boolean, isActive: boolean) => {
+const createCustomIcon = (hasData: boolean, isSelected: boolean, isActive: boolean) => {
   const size = isSelected ? 32 : 24;
+  const color = hasData 
+    ? (isActive ? '#1a91d1' : '#8b9298') 
+    : 'rgba(128, 128, 128, 0.5)';
+  
   const svg = `
     <svg width="${size}" height="${size}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
       <circle cx="12" cy="12" r="10" fill="${color}" stroke="white" stroke-width="2"/>
-      ${isActive ? '<circle cx="12" cy="12" r="4" fill="white" class="animate-pulse"/>' : ''}
+      ${isActive && hasData ? '<circle cx="12" cy="12" r="4" fill="white"/>' : ''}
     </svg>
   `;
   return L.divIcon({
@@ -120,46 +124,18 @@ export const CreteMap = ({ selectedStation, onStationSelect, availableStations =
         <div className="relative">
           {/* OpenStreetMap with Leaflet */}
           <div className="relative w-full h-96 rounded-lg border overflow-hidden">
-            <MapContainer
-              center={creteCenter}
-              zoom={9}
-              style={{ height: '100%', width: '100%' }}
-              scrollWheelZoom={true}
-            >
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              
+            <MapContainer center={creteCenter} zoom={9} style={{ height: '100%', width: '100%' }} scrollWheelZoom={true}>
+              <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
               {meteorologicalStations.map((station) => {
                 const hasData = hasStationData(station.id);
                 const isSelected = selectedStation === station.id;
-                const markerColor = hasData 
-                  ? (station.active ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))') 
-                  : 'rgba(128, 128, 128, 0.5)';
-                
                 return (
-                  <Marker
-                    key={station.id}
-                    position={[station.coordinates.lat, station.coordinates.lng]}
-                    icon={createCustomIcon(markerColor, isSelected, station.active)}
-                    eventHandlers={{
-                      click: () => {
-                        if (hasData) {
-                          onStationSelect(station.id);
-                        }
-                      },
-                      mouseover: () => setHoveredStation(station.id),
-                      mouseout: () => setHoveredStation(null),
-                    }}
-                  >
+                  <Marker key={station.id} position={[station.coordinates.lat, station.coordinates.lng]} icon={createCustomIcon(hasData, isSelected, station.active)} eventHandlers={{ click: () => { if (hasData) { onStationSelect(station.id); } }, mouseover: () => setHoveredStation(station.id), mouseout: () => setHoveredStation(null) }}>
                     <Popup>
                       <div className="space-y-2">
                         <div className="flex items-center justify-between gap-2">
                           <h4 className="font-semibold text-sm">{station.name}</h4>
-                          <Badge variant={station.active ? "default" : "secondary"} className="text-xs">
-                            {station.active ? "Online" : "Offline"}
-                          </Badge>
+                          <Badge variant={station.active ? "default" : "secondary"} className="text-xs">{station.active ? "Online" : "Offline"}</Badge>
                         </div>
                         <div className="text-xs text-muted-foreground space-y-1">
                           <p className="flex items-center gap-1">
