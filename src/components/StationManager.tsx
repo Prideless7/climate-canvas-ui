@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Trash2, MapPin, Save } from "lucide-react";
+import { Plus, Trash2, MapPin, Save, Search } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,10 +27,22 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useStations } from "@/hooks/useStations";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
+
+interface SearchResult {
+  place_id: number;
+  display_name: string;
+  lat: string;
+  lon: string;
+  name: string;
+}
 
 export const StationManager = () => {
   const { stations, addStation, deleteStation, isAdding, isDeleting } = useStations();
   const [open, setOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     location: "",
@@ -39,6 +51,53 @@ export const StationManager = () => {
     elevation: "",
     active: true,
   });
+
+  const searchLocation = async () => {
+    if (!searchQuery.trim()) {
+      toast.error("Please enter a location name to search");
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      // OpenStreetMap Nominatim API - free, no API key required
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=5&countrycodes=gr`,
+        {
+          headers: {
+            'User-Agent': 'MeteorologicalStationManager/1.0'
+          }
+        }
+      );
+
+      if (!response.ok) throw new Error('Search failed');
+
+      const results = await response.json();
+      setSearchResults(results);
+
+      if (results.length === 0) {
+        toast.info("No locations found. Try a different search term.");
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+      toast.error("Failed to search location. Please try again.");
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const selectSearchResult = (result: SearchResult) => {
+    setFormData({
+      ...formData,
+      name: formData.name || `${result.name} Station`,
+      location: result.name,
+      latitude: result.lat,
+      longitude: result.lon,
+    });
+    setSearchResults([]);
+    setSearchQuery("");
+    toast.success("Location coordinates filled in!");
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,6 +155,64 @@ export const StationManager = () => {
               </DialogHeader>
               <form onSubmit={handleSubmit}>
                 <div className="grid gap-4 py-4">
+                  {/* Location Search */}
+                  <div className="grid gap-2">
+                    <Label htmlFor="search">Search Location on Map</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="search"
+                        placeholder="e.g., Heraklion, Crete"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            searchLocation();
+                          }
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        onClick={searchLocation}
+                        disabled={isSearching}
+                      >
+                        <Search className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    {searchResults.length > 0 && (
+                      <div className="border rounded-lg max-h-48 overflow-y-auto">
+                        {searchResults.map((result) => (
+                          <button
+                            key={result.place_id}
+                            type="button"
+                            onClick={() => selectSearchResult(result)}
+                            className="w-full text-left px-3 py-2 hover:bg-accent text-sm border-b last:border-b-0"
+                          >
+                            <p className="font-medium">{result.name}</p>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {result.display_name}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {parseFloat(result.lat).toFixed(4)}, {parseFloat(result.lon).toFixed(4)}
+                            </p>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-background px-2 text-muted-foreground">
+                        Or enter manually
+                      </span>
+                    </div>
+                  </div>
+
                   <div className="grid gap-2">
                     <Label htmlFor="name">Station Name *</Label>
                     <Input
