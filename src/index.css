@@ -149,21 +149,3 @@ All colors MUST be HSL.
     border-color: hsl(var(--rainfall));
   }
 }
-
-/* Leaflet custom marker styles */
-.custom-marker-icon {
-  background: none !important;
-  border: none !important;
-}
-
-.leaflet-popup-content-wrapper {
-  background-color: hsl(var(--card));
-  color: hsl(var(--card-foreground));
-  border: 1px solid hsl(var(--border));
-  border-radius: var(--radius);
-}
-
-.leaflet-popup-tip {
-  background-color: hsl(var(--card));
-  border: 1px solid hsl(var(--border));
-}
