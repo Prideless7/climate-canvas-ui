@@ -1,8 +1,13 @@
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { useEffect, useState } from 'react';
 import { MapPin } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+
+// Dynamically import leaflet dependencies
+let MapContainer: any;
+let TileLayer: any;
+let Marker: any;
+let Popup: any;
+let L: any;
 
 interface Station {
   id: string;
@@ -21,36 +26,62 @@ interface LeafletMapProps {
   hasStationData: (stationId: string) => boolean;
 }
 
-// Create custom icon based on station status
-const createCustomIcon = (isActive: boolean, hasData: boolean, isSelected: boolean) => {
-  const color = hasData ? (isActive ? '#1a91d1' : '#8b9298') : 'rgba(128, 128, 128, 0.5)';
-  const size = isSelected ? 32 : 24;
-  
-  return L.divIcon({
-    className: 'custom-marker',
-    html: `
-      <div style="
-        width: ${size}px;
-        height: ${size}px;
-        background-color: ${color};
-        border: ${isSelected ? '3px' : '2px'} solid white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        ${hasData ? 'cursor: pointer;' : 'cursor: not-allowed; opacity: 0.5;'}
-      ">
-        ${isActive ? `<div style="width: 8px; height: 8px; background-color: white; border-radius: 50%; animation: pulse 2s infinite;"></div>` : ''}
-      </div>
-    `,
-    iconSize: [size, size],
-    iconAnchor: [size / 2, size / 2],
-    popupAnchor: [0, -size / 2]
-  });
-};
-
 export const LeafletMap = ({ stations, selectedStation, onStationSelect, hasStationData }: LeafletMapProps) => {
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    // Only load leaflet in the browser
+    if (typeof window !== 'undefined') {
+      Promise.all([
+        import('react-leaflet'),
+        import('leaflet'),
+        import('leaflet/dist/leaflet.css')
+      ]).then(([reactLeaflet, leaflet]) => {
+        MapContainer = reactLeaflet.MapContainer;
+        TileLayer = reactLeaflet.TileLayer;
+        Marker = reactLeaflet.Marker;
+        Popup = reactLeaflet.Popup;
+        L = leaflet.default;
+        setIsLoaded(true);
+      });
+    }
+  }, []);
+
+  // Create custom icon based on station status
+  const createCustomIcon = (isActive: boolean, hasData: boolean, isSelected: boolean) => {
+    if (!L) return undefined;
+    
+    const color = hasData ? (isActive ? '#1a91d1' : '#8b9298') : 'rgba(128, 128, 128, 0.5)';
+    const size = isSelected ? 32 : 24;
+    
+    return L.divIcon({
+      className: 'custom-marker',
+      html: `
+        <div style="
+          width: ${size}px;
+          height: ${size}px;
+          background-color: ${color};
+          border: ${isSelected ? '3px' : '2px'} solid white;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+          ${hasData ? 'cursor: pointer;' : 'cursor: not-allowed; opacity: 0.5;'}
+        ">
+          ${isActive ? `<div style="width: 8px; height: 8px; background-color: white; border-radius: 50%; animation: pulse 2s infinite;"></div>` : ''}
+        </div>
+      `,
+      iconSize: [size, size],
+      iconAnchor: [size / 2, size / 2],
+      popupAnchor: [0, -size / 2]
+    });
+  };
+
+  if (!isLoaded || !MapContainer) {
+    return <div className="w-full h-full flex items-center justify-center">Loading map...</div>;
+  }
+
   return (
     <MapContainer
       center={[35.2401, 24.8093]}
