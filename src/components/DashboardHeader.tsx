@@ -15,6 +15,7 @@ import { ClearDataButtons } from "./ClearDataButtons";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useStations } from "@/hooks/useStations";
 
 interface DashboardHeaderProps {
   isDarkMode: boolean;
@@ -26,18 +27,14 @@ interface DashboardHeaderProps {
   onDataCleared: () => void;
 }
 
-const stationNames: Record<string, string> = {
-  Tympaki: "Tympaki Station",
-  Potamies: "Potamies Station",
-  Doxaro: "Doxaro Station",
-  Pyrgos: "Pyrgos Station",
-  Ziros: "Ziros Station"
-};
-
 export const DashboardHeader = ({ isDarkMode, toggleTheme, selectedStation, timePeriod, onTimePeriodChange, onAdvancedFilter, onDataCleared }: DashboardHeaderProps) => {
   const { user, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { stations } = useStations();
+  
+  const currentStation = stations.find(s => s.id === selectedStation);
+  const stationDisplayName = currentStation?.name || "Unknown Station";
 
   const handleLogout = async () => {
     await signOut();
@@ -59,7 +56,7 @@ export const DashboardHeader = ({ isDarkMode, toggleTheme, selectedStation, time
               Live Data
             </Badge>
             <Badge variant="outline" className="text-xs">
-              {stationNames[selectedStation] || "Unknown Station"}
+              {stationDisplayName}
             </Badge>
           </div>
         </div>

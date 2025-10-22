@@ -22,24 +22,21 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useStations } from "@/hooks/useStations";
 
 interface ClearDataButtonsProps {
   selectedStation: string;
   onDataCleared: () => void;
 }
 
-const stationNames: Record<string, string> = {
-  Tympaki: "Tympaki Station",
-  Potamies: "Potamies Station", 
-  Doxaro: "Doxaro Station",
-  Pyrgos: "Pyrgos Station",
-  Ziros: "Ziros Station"
-};
-
 export const ClearDataButtons = ({ selectedStation, onDataCleared }: ClearDataButtonsProps) => {
   const [isClearing, setIsClearing] = useState(false);
   const { toast } = useToast();
   const { isAdmin } = useAuth();
+  const { stations } = useStations();
+  
+  const currentStation = stations.find(s => s.id === selectedStation);
+  const stationDisplayName = currentStation?.name || "Unknown Station";
 
   // Only admins can clear data
   if (!isAdmin) {
@@ -49,26 +46,17 @@ export const ClearDataButtons = ({ selectedStation, onDataCleared }: ClearDataBu
   const clearStationData = async () => {
     setIsClearing(true);
     try {
-      // Get station ID first
-      const { data: stations, error: stationError } = await supabase
-        .from('stations')
-        .select('id')
-        .eq('name', selectedStation)
-        .single();
-
-      if (stationError) throw stationError;
-
-      // Delete meteorological readings for this station
+      // Delete meteorological readings for this station (selectedStation is already the ID)
       const { error: deleteError } = await supabase
         .from('meteorological_readings')
         .delete()
-        .eq('station_id', stations.id);
+        .eq('station_id', selectedStation);
 
       if (deleteError) throw deleteError;
 
       toast({
         title: "Success",
-        description: `All data cleared for ${stationNames[selectedStation] || selectedStation}`,
+        description: `All data cleared for ${stationDisplayName}`,
       });
       
       onDataCleared();
@@ -125,7 +113,7 @@ export const ClearDataButtons = ({ selectedStation, onDataCleared }: ClearDataBu
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-              Clear {stationNames[selectedStation] || selectedStation} Data
+              Clear {stationDisplayName} Data
             </DropdownMenuItem>
           </AlertDialogTrigger>
           <AlertDialogContent>
@@ -133,7 +121,7 @@ export const ClearDataButtons = ({ selectedStation, onDataCleared }: ClearDataBu
               <AlertDialogTitle>Clear Station Data</AlertDialogTitle>
               <AlertDialogDescription>
                 This will permanently delete all meteorological data for{" "}
-                <strong>{stationNames[selectedStation] || selectedStation}</strong>.
+                <strong>{stationDisplayName}</strong>.
                 The station itself will remain intact. This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>

@@ -42,14 +42,14 @@ export const Dashboard = () => {
   const loadStations = async () => {
     try {
       const stations = await meteorologicalService.getStations();
-      const stationNames = stations.map(s => s.name);
-      setAvailableStations(stationNames);
+      const stationIds = stations.map(s => s.id);
+      setAvailableStations(stationIds);
       
       // Check which stations have data
-      const stationsWithDataPromises = stationNames.map(async (stationName) => {
+      const stationsWithDataPromises = stationIds.map(async (stationId) => {
         try {
-          const data = await meteorologicalService.getStationDataByTimePeriod(stationName, "all");
-          return data.length > 0 ? stationName : null;
+          const data = await meteorologicalService.getStationDataByTimePeriod(stationId, "all");
+          return data.length > 0 ? stationId : null;
         } catch {
           return null;
         }
@@ -59,7 +59,7 @@ export const Dashboard = () => {
       const stationsWithDataList = stationsWithDataResults.filter(Boolean) as string[];
       setStationsWithData(stationsWithDataList);
       
-      if (stationNames.length > 0) {
+      if (stationIds.length > 0) {
         setIsDataImported(true);
       }
     } catch (error) {
@@ -67,12 +67,12 @@ export const Dashboard = () => {
     }
   };
 
-  const loadStationData = async (stationName: string) => {
-    if (!stationName) return;
+  const loadStationData = async (stationId: string) => {
+    if (!stationId) return;
     
     setIsLoading(true);
     try {
-      const data = await meteorologicalService.getStationDataByTimePeriod(stationName, timePeriod);
+      const data = await meteorologicalService.getStationDataByTimePeriod(stationId, timePeriod);
       setStationData(data);
     } catch (error: any) {
       console.error('Error loading station data:', error);
@@ -86,11 +86,11 @@ export const Dashboard = () => {
     }
   };
 
-  const handleDataImport = async (stationName: string) => {
-    setSelectedStation(stationName);
+  const handleDataImport = async (stationId: string) => {
+    setSelectedStation(stationId);
     setCurrentView("overview");
     await loadStations();
-    await loadStationData(stationName);
+    await loadStationData(stationId);
   };
 
   const handleNavigationChange = (viewId: string) => {
@@ -101,9 +101,9 @@ export const Dashboard = () => {
     }
   };
 
-  const handleStationSelect = async (stationName: string) => {
-    setSelectedStation(stationName);
-    await loadStationData(stationName);
+  const handleStationSelect = async (stationId: string) => {
+    setSelectedStation(stationId);
+    await loadStationData(stationId);
   };
 
   const handleTimePeriodChange = async (newTimePeriod: string) => {
