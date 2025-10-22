@@ -149,3 +149,13 @@ All colors MUST be HSL.
     border-color: hsl(var(--rainfall));
   }
 }
+
+/* Leaflet custom marker animations */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
