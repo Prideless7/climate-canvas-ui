@@ -124,18 +124,43 @@ export const CreteMap = ({ selectedStation, onStationSelect, availableStations =
         <div className="relative">
           {/* OpenStreetMap with Leaflet */}
           <div className="relative w-full h-96 rounded-lg border overflow-hidden">
-            <MapContainer center={creteCenter} zoom={9} style={{ height: '100%', width: '100%' }} scrollWheelZoom={true}>
-              <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+            <MapContainer
+              center={creteCenter}
+              zoom={9}
+              style={{ height: '100%', width: '100%' }}
+              scrollWheelZoom={true}
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              
               {meteorologicalStations.map((station) => {
                 const hasData = hasStationData(station.id);
                 const isSelected = selectedStation === station.id;
+                
                 return (
-                  <Marker key={station.id} position={[station.coordinates.lat, station.coordinates.lng]} icon={createCustomIcon(hasData, isSelected, station.active)} eventHandlers={{ click: () => { if (hasData) { onStationSelect(station.id); } }, mouseover: () => setHoveredStation(station.id), mouseout: () => setHoveredStation(null) }}>
+                  <Marker
+                    key={station.id}
+                    position={[station.coordinates.lat, station.coordinates.lng]}
+                    icon={createCustomIcon(hasData, isSelected, station.active)}
+                    eventHandlers={{
+                      click: () => {
+                        if (hasData) {
+                          onStationSelect(station.id);
+                        }
+                      },
+                      mouseover: () => setHoveredStation(station.id),
+                      mouseout: () => setHoveredStation(null),
+                    }}
+                  >
                     <Popup>
                       <div className="space-y-2">
                         <div className="flex items-center justify-between gap-2">
                           <h4 className="font-semibold text-sm">{station.name}</h4>
-                          <Badge variant={station.active ? "default" : "secondary"} className="text-xs">{station.active ? "Online" : "Offline"}</Badge>
+                          <Badge variant={station.active ? "default" : "secondary"} className="text-xs">
+                            {station.active ? "Online" : "Offline"}
+                          </Badge>
                         </div>
                         <div className="text-xs text-muted-foreground space-y-1">
                           <p className="flex items-center gap-1">
