@@ -63,18 +63,23 @@ export default function SimpleLeafletMap({
         const icon = L.divIcon({
           className: 'custom-marker',
           html: `
-            <div style="
+            <div class="leaflet-marker-wrapper" style="
               width: ${size}px;
               height: ${size}px;
               background-color: ${color};
-              border: ${isSelected ? '3px' : '2px'} solid white;
+              border: ${isSelected ? '4px' : '2px'} solid white;
               border-radius: 50%;
               display: flex;
               align-items: center;
               justify-content: center;
-              box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+              box-shadow: ${isSelected ? '0 4px 12px rgba(0,0,0,0.4)' : '0 2px 4px rgba(0,0,0,0.3)'};
               ${hasData ? 'cursor: pointer;' : 'cursor: not-allowed; opacity: 0.5;'}
-            ">
+              transition: all 0.2s ease;
+              ${isSelected ? 'transform: scale(1.1);' : ''}
+            "
+            onmouseover="if(this.style.cursor === 'pointer') { this.style.transform = 'scale(1.15)'; this.style.boxShadow = '0 4px 12px rgba(0,0,0,0.5)'; }"
+            onmouseout="this.style.transform = '${isSelected ? 'scale(1.1)' : 'scale(1)'}'; this.style.boxShadow = '${isSelected ? '0 4px 12px rgba(0,0,0,0.4)' : '0 2px 4px rgba(0,0,0,0.3)'}';"
+            >
               ${station.active ? `<div style="width: 8px; height: 8px; background-color: white; border-radius: 50%; animation: pulse 2s infinite;"></div>` : ''}
             </div>
           `,
