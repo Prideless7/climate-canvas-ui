@@ -73,10 +73,15 @@ export const DataImport = ({ onDataImport }: DataImportProps) => {
       const csvData = await uploadedFile.text();
       const stationInfo = stations.find(s => s.id === selectedStation);
       
+      if (!stationInfo) {
+        throw new Error('Station not found');
+      }
+      
       // Call backend API to process and store CSV data
       const { data, error } = await supabase.functions.invoke('import-csv-data', {
         body: {
-          stationName: selectedStation,
+          stationId: selectedStation,  // Send station ID
+          stationName: stationInfo.name,  // Also send name for logging
           csvData: csvData
         }
       });

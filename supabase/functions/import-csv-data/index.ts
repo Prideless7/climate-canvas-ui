@@ -169,16 +169,16 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const { stationName, csvData } = await req.json();
+    const { stationId, stationName, csvData } = await req.json();
 
-    if (!stationName || !csvData) {
+    if (!stationId || !csvData) {
       return new Response(
-        JSON.stringify({ error: 'Station name and CSV data are required' }),
+        JSON.stringify({ error: 'Station ID and CSV data are required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log(`Processing CSV import for station: ${stationName}`);
+    console.log(`Processing CSV import for station: ${stationName || stationId}`);
 
     // Parse CSV data
     const lines = csvData.trim().split('\n');
@@ -192,34 +192,18 @@ Deno.serve(async (req) => {
     const headers = parseCSVLine(lines[0]);
     console.log('CSV Headers:', headers);
 
-    // Create or get station
-    let { data: station, error: stationError } = await supabase
+    // Verify station exists
+    const { data: station, error: stationError } = await supabase
       .from('stations')
-      .select('id')
-      .eq('name', stationName)
-      .maybeSingle();
+      .select('id, name')
+      .eq('id', stationId)
+      .single();
 
-    if (!station) {
-      // Station doesn't exist, create it
-      const { data: newStation, error: createError } = await supabase
-        .from('stations')
-        .insert([{ name: stationName }])
-        .select('id')
-        .single();
-
-      if (createError) {
-        console.error('Error creating station:', createError);
-        return new Response(
-          JSON.stringify({ error: 'Failed to create station' }),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      station = newStation;
-    } else if (stationError) {
-      console.error('Error fetching station:', stationError);
+    if (stationError || !station) {
+      console.error('Station not found:', stationError);
       return new Response(
-        JSON.stringify({ error: 'Failed to fetch station' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'Station not found' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -278,7 +262,7 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: `Successfully imported ${totalInserted} readings for station ${stationName}`,
+        message: `Successfully imported ${totalInserted} readings for station ${station.name}`,
         totalRows: readings.length,
         inserted: totalInserted,
         errors: totalErrors,
