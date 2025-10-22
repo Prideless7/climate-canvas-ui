@@ -1,12 +1,9 @@
 
-import { lazy, Suspense } from 'react';
 import { MapPin, Radio, Thermometer, CloudRain, Sun } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-
-const LeafletMap = lazy(() => import('./LeafletMap').then(module => ({ default: module.LeafletMap })));
+import SimpleLeafletMap from './SimpleLeafletMap';
 
 interface Station {
   id: string;
@@ -92,14 +89,12 @@ export const CreteMap = ({ selectedStation, onStationSelect, availableStations =
         <div className="relative">
           {/* Dynamic OpenStreetMap */}
           <div className="relative w-full h-96 rounded-lg border overflow-hidden">
-            <Suspense fallback={<Skeleton className="w-full h-full" />}>
-              <LeafletMap 
-                stations={meteorologicalStations}
-                selectedStation={selectedStation}
-                onStationSelect={onStationSelect}
-                hasStationData={hasStationData}
-              />
-            </Suspense>
+            <SimpleLeafletMap 
+              stations={meteorologicalStations}
+              selectedStation={selectedStation}
+              onStationSelect={onStationSelect}
+              hasStationData={hasStationData}
+            />
           </div>
         </div>
 
