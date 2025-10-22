@@ -4,64 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import SimpleLeafletMap from './SimpleLeafletMap';
-
-interface Station {
-  id: string;
-  name: string;
-  location: string;
-  coordinates: { lat: number; lng: number };
-  active: boolean;
-  elevation: number;
-  lastUpdate: string;
-}
-
-const meteorologicalStations: Station[] = [
-  {
-    id: "Tympaki",
-    name: "Tympaki Station",
-    location: "Tympaki",
-    coordinates: { lat: 35.0697, lng: 24.7661 }, // South-central Crete
-    active: true,
-    elevation: 15,
-    lastUpdate: "2 min ago"
-  },
-  {
-    id: "Potamies",
-    name: "Potamies Station", 
-    location: "Potamies",
-    coordinates: { lat: 35.2854, lng: 25.4556 }, // Northeast Crete
-    active: true,
-    elevation: 120,
-    lastUpdate: "3 min ago"
-  },
-  {
-    id: "Pyrgos",
-    name: "Pyrgos Station",
-    location: "Pyrgos",
-    coordinates: { lat: 35.3340, lng: 24.0500 }, // Western Crete
-    active: true,
-    elevation: 85,
-    lastUpdate: "1 min ago"
-  },
-  {
-    id: "Doxaro",
-    name: "Doxaro Station",
-    location: "Doxaro", 
-    coordinates: { lat: 35.2200, lng: 25.7800 }, // Eastern Crete
-    active: true,
-    elevation: 210,
-    lastUpdate: "4 min ago"
-  },
-  {
-    id: "Ziros",
-    name: "Ziros Station",
-    location: "Ziros",
-    coordinates: { lat: 35.1397, lng: 26.1300 }, // Far eastern Crete
-    active: true,
-    elevation: 95,
-    lastUpdate: "2 min ago"
-  }
-];
+import { useStations } from '@/hooks/useStations';
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface CreteMapProps {
   selectedStation: string;
@@ -71,8 +15,36 @@ interface CreteMapProps {
 }
 
 export const CreteMap = ({ selectedStation, onStationSelect, availableStations = [], stationsWithData = [] }: CreteMapProps) => {
+  const { stations, isLoading } = useStations();
   const isStationAvailable = (stationId: string) => availableStations?.includes(stationId) || false;
   const hasStationData = (stationId: string) => stationsWithData?.includes(stationId) || false;
+
+  // Transform database stations to map format
+  const mapStations = stations.map(station => ({
+    id: station.id,
+    name: station.name,
+    location: station.location,
+    coordinates: { lat: station.latitude, lng: station.longitude },
+    active: station.active,
+    elevation: station.elevation,
+    lastUpdate: new Date(station.last_update).toLocaleString(),
+  }));
+
+  if (isLoading) {
+    return (
+      <Card className="border-primary/20">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MapPin className="w-5 h-5 text-primary" />
+            Meteorological Stations - Crete, Greece
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Skeleton className="w-full h-96" />
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="border-primary/20">
@@ -90,7 +62,7 @@ export const CreteMap = ({ selectedStation, onStationSelect, availableStations =
           {/* Dynamic OpenStreetMap */}
           <div className="relative w-full h-96 rounded-lg border overflow-hidden">
             <SimpleLeafletMap 
-              stations={meteorologicalStations}
+              stations={mapStations}
               selectedStation={selectedStation}
               onStationSelect={onStationSelect}
               hasStationData={hasStationData}
@@ -105,7 +77,7 @@ export const CreteMap = ({ selectedStation, onStationSelect, availableStations =
             Available Stations
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            {meteorologicalStations.map((station) => (
+            {mapStations.map((station) => (
               <Button
                 key={station.id}
                 variant={selectedStation === station.id ? "default" : "outline"}

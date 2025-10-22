@@ -99,23 +99,38 @@ export type Database = {
       }
       stations: {
         Row: {
+          active: boolean
           created_at: string
+          elevation: number
           id: string
+          last_update: string
+          latitude: number
           location: string | null
+          longitude: number
           name: string
           updated_at: string
         }
         Insert: {
+          active?: boolean
           created_at?: string
+          elevation?: number
           id?: string
+          last_update?: string
+          latitude?: number
           location?: string | null
+          longitude?: number
           name: string
           updated_at?: string
         }
         Update: {
+          active?: boolean
           created_at?: string
+          elevation?: number
           id?: string
+          last_update?: string
+          latitude?: number
           location?: string | null
+          longitude?: number
           name?: string
           updated_at?: string
         }

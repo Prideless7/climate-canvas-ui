@@ -8,6 +8,9 @@ import { useToast } from "@/hooks/use-toast";
 import { MeteoData } from "./Dashboard";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useStations } from "@/hooks/useStations";
+import { StationManager } from "./StationManager";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface DataImportProps {
   onDataImport: (stationName: string) => void;
@@ -15,6 +18,7 @@ interface DataImportProps {
 
 export const DataImport = ({ onDataImport }: DataImportProps) => {
   const { isAdmin } = useAuth();
+  const { stations, isLoading: isLoadingStations } = useStations();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedStation, setSelectedStation] = useState<string>("");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -35,14 +39,6 @@ export const DataImport = ({ onDataImport }: DataImportProps) => {
       </div>
     );
   }
-
-  const availableStations = [
-    { id: "Tympaki", name: "Tympaki Station", location: "Tympaki" },
-    { id: "Potamies", name: "Potamies Station", location: "Potamies" },
-    { id: "Pyrgos", name: "Pyrgos Station", location: "Pyrgos" },
-    { id: "Doxaro", name: "Doxaro Station", location: "Doxaro" },
-    { id: "Ziros", name: "Ziros Station", location: "Ziros" },
-  ];
 
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,7 +71,7 @@ export const DataImport = ({ onDataImport }: DataImportProps) => {
     
     try {
       const csvData = await uploadedFile.text();
-      const stationInfo = availableStations.find(s => s.id === selectedStation);
+      const stationInfo = stations.find(s => s.id === selectedStation);
       
       // Call backend API to process and store CSV data
       const { data, error } = await supabase.functions.invoke('import-csv-data', {
@@ -114,8 +110,21 @@ export const DataImport = ({ onDataImport }: DataImportProps) => {
     }
   };
 
+  if (isLoadingStations) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-[400px] w-full" />
+      </div>
+    );
+  }
+
   return (
-    <Card className="border-dashed border-2 border-primary/20 hover:border-primary/40 transition-colors">
+    <div className="space-y-6">
+      {/* Station Management Section */}
+      <StationManager />
+
+      {/* Data Import Section */}
+      <Card className="border-dashed border-2 border-primary/20 hover:border-primary/40 transition-colors">
       <CardHeader className="text-center">
         <CardTitle className="flex items-center justify-center gap-2">
           <FileText className="h-5 w-5" />
@@ -137,7 +146,7 @@ export const DataImport = ({ onDataImport }: DataImportProps) => {
               <SelectValue placeholder="Choose a meteorological station" />
             </SelectTrigger>
             <SelectContent>
-              {availableStations.map((station) => (
+              {stations.map((station) => (
                 <SelectItem key={station.id} value={station.id}>
                   <div className="flex flex-col">
                     <span className="font-medium">{station.name}</span>
@@ -213,5 +222,6 @@ export const DataImport = ({ onDataImport }: DataImportProps) => {
         </div>
       </CardContent>
     </Card>
+    </div>
   );
 };
