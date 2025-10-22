@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { MapPin, Radio, Thermometer, CloudRain, Sun } from 'lucide-react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -105,9 +105,14 @@ export const CreteMap = ({ selectedStation, onStationSelect, availableStations =
   const isStationAvailable = (stationId: string) => availableStations?.includes(stationId) || false;
   const hasStationData = (stationId: string) => stationsWithData?.includes(stationId) || false;
   const [hoveredStation, setHoveredStation] = useState<string | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
 
   // Center of Crete
   const creteCenter: [number, number] = [35.24, 25.0];
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   return (
     <Card className="border-primary/20">
@@ -124,59 +129,61 @@ export const CreteMap = ({ selectedStation, onStationSelect, availableStations =
         <div className="relative">
           {/* OpenStreetMap with Leaflet */}
           <div className="relative w-full h-96 rounded-lg border overflow-hidden">
-            <MapContainer
-              center={creteCenter}
-              zoom={9}
-              style={{ height: '100%', width: '100%' }}
-              scrollWheelZoom={true}
-            >
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              
-              {meteorologicalStations.map((station) => {
-                const hasData = hasStationData(station.id);
-                const isSelected = selectedStation === station.id;
+            {isMounted && (
+              <MapContainer
+                center={creteCenter}
+                zoom={9}
+                style={{ height: '100%', width: '100%' }}
+                scrollWheelZoom={true}
+              >
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
                 
-                return (
-                  <Marker
-                    key={station.id}
-                    position={[station.coordinates.lat, station.coordinates.lng]}
-                    icon={createCustomIcon(hasData, isSelected, station.active)}
-                    eventHandlers={{
-                      click: () => {
-                        if (hasData) {
-                          onStationSelect(station.id);
-                        }
-                      },
-                      mouseover: () => setHoveredStation(station.id),
-                      mouseout: () => setHoveredStation(null),
-                    }}
-                  >
-                    <Popup>
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between gap-2">
-                          <h4 className="font-semibold text-sm">{station.name}</h4>
-                          <Badge variant={station.active ? "default" : "secondary"} className="text-xs">
-                            {station.active ? "Online" : "Offline"}
-                          </Badge>
+                {meteorologicalStations.map((station) => {
+                  const hasData = hasStationData(station.id);
+                  const isSelected = selectedStation === station.id;
+                  
+                  return (
+                    <Marker
+                      key={station.id}
+                      position={[station.coordinates.lat, station.coordinates.lng]}
+                      icon={createCustomIcon(hasData, isSelected, station.active)}
+                      eventHandlers={{
+                        click: () => {
+                          if (hasData) {
+                            onStationSelect(station.id);
+                          }
+                        },
+                        mouseover: () => setHoveredStation(station.id),
+                        mouseout: () => setHoveredStation(null),
+                      }}
+                    >
+                      <Popup>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <h4 className="font-semibold text-sm">{station.name}</h4>
+                            <Badge variant={station.active ? "default" : "secondary"} className="text-xs">
+                              {station.active ? "Online" : "Offline"}
+                            </Badge>
+                          </div>
+                          <div className="text-xs text-muted-foreground space-y-1">
+                            <p className="flex items-center gap-1">
+                              <MapPin className="w-3 h-3" />
+                              {station.location}
+                            </p>
+                            <p>Elevation: {station.elevation}m</p>
+                            <p>Coordinates: {station.coordinates.lat.toFixed(4)}, {station.coordinates.lng.toFixed(4)}</p>
+                            <p>Updated: {station.lastUpdate}</p>
+                          </div>
                         </div>
-                        <div className="text-xs text-muted-foreground space-y-1">
-                          <p className="flex items-center gap-1">
-                            <MapPin className="w-3 h-3" />
-                            {station.location}
-                          </p>
-                          <p>Elevation: {station.elevation}m</p>
-                          <p>Coordinates: {station.coordinates.lat.toFixed(4)}, {station.coordinates.lng.toFixed(4)}</p>
-                          <p>Updated: {station.lastUpdate}</p>
-                        </div>
-                      </div>
-                    </Popup>
-                  </Marker>
-                );
-              })}
-            </MapContainer>
+                      </Popup>
+                    </Marker>
+                  );
+                })}
+              </MapContainer>
+            )}
           </div>
         </div>
 
