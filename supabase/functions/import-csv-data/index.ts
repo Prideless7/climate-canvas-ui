@@ -19,77 +19,56 @@ interface MeteoReading {
   rain_duration?: number;
 }
 
-// Column mapping for different station formats
-const columnMappings: Record<string, string> = {
-  // Temperature mappings
-  'M05 Temperature (AVG)': 'temperature',
-  'M07 Temperature (AVG)': 'temperature',
-  'ΠΥΡΓΟΣ AIR TEMP (AVG)': 'temperature',
-  'M02 Temperature (AVG)': 'temperature',
-  'M04 Temperature (AVG)': 'temperature',
-  'ΑΝΩΓΕΙΑ Temperature (AVG)': 'temperature',
+// Dynamic pattern-based column mapping
+function mapColumnToField(columnHeader: string): string | null {
+  const header = columnHeader.toLowerCase();
   
-  // Humidity mappings
-  'M05 Relative Humidity (AVG)': 'humidity',
-  'M07 Relative Humidity (AVG)': 'humidity',
-  'ΠΥΡΓΟΣ Humidity (AVG)': 'humidity',
-  'ΔΟΞΑΡΟ Relative Humidity': 'humidity',
-  'M04 Relative Humidity (AVG)': 'humidity',
-  'ΑΝΩΓΕΙΑ Relative Humidity (AVG)': 'humidity',
+  // Temperature patterns
+  if (header.includes('temperature') || header.includes('air temp')) {
+    return 'temperature';
+  }
   
-  // Precipitation mappings
-  'M05 Precipitation (SUM)': 'precipitation',
-  'M07 Precipitation (SUM)': 'precipitation',
-  'ΠΥΡΓΟΣ Rain (SUM)': 'precipitation',
-  'M02 Precipitation (SUM)': 'precipitation',
-  'M04 Precipitation (SUM)': 'precipitation',
-  'ΑΝΩΓΕΙΑ Precipitation (SUM)': 'precipitation',
+  // Humidity patterns
+  if (header.includes('humidity')) {
+    return 'humidity';
+  }
   
-  // Wind speed mappings
-  'M05 WIND SPEED (AVG)': 'wind_speed',
-  'M07 WIND SPEED (AVG)': 'wind_speed',
-  'ΠΥΡΓΟΣ WIND SPEED (AVG)': 'wind_speed',
-  'M02 WIND SPEED (AVG)': 'wind_speed',
-  'M04 WIND SPEED (AVG)': 'wind_speed',
-  'ΑΝΩΓΕΙΑ WIND SPEED (AVG)': 'wind_speed',
+  // Precipitation/Rain patterns
+  if (header.includes('precipitation') || header.includes('rain') && !header.includes('duration')) {
+    return 'precipitation';
+  }
   
-  // Wind direction mappings
-  'ΤΥΜΠΑΚΙ WIND DIRECTION (AVG)': 'wind_direction',
-  'ΠΟΤΑΜΙΕΣ WIND DIRECTION (AVG)': 'wind_direction',
-  'ΠΥΡΓΟΣ WIND DΙRECTION (AVG)': 'wind_direction',
-  'ΔΟΞΑΡΟ WIND DIRECTION (AVG)': 'wind_direction',
-  'ΖΗΡΟΣ WIND DIRECTION (AVG)': 'wind_direction',
-  'ΑΝΩΓΕΙΑ WIND DIRECTION (AVG)': 'wind_direction',
+  // Wind speed patterns
+  if (header.includes('wind speed') || header.includes('wind_speed')) {
+    return 'wind_speed';
+  }
   
-  // Pressure mappings
-  'M05 Barometric Pressure (AVG)': 'pressure',
-  'M07 Barometric Pressure (AVG)': 'pressure',
-  'ΠΥΡΓΟΣ BAROMETER (AVG)': 'pressure',
-  'M02 Barometric Pressure (AVG)': 'pressure',
-  'M04 Barometric Pressure (AVG)': 'pressure',
-  'ΑΝΩΓΕΙΑ Barometric Pressure (AVG)': 'pressure',
+  // Wind direction patterns
+  if (header.includes('wind direction') || header.includes('wind_direction')) {
+    return 'wind_direction';
+  }
   
-  // Solar radiation mappings
-  'M05 Pyranometer 0 - 2000 W/m² (AVG)': 'solar_radiation',
-  'M07 Pyranometer 0 - 2000 W/m² (AVG)': 'solar_radiation',
-  'ΠΥΡΓΟΣ SOLAR (AVG)': 'solar_radiation',
-  'M02 Pyranometer 0 - 2000 W/m² (AVG)': 'solar_radiation',
-  'M04 Pyranometer 0 - 2000 W/m² (AVG)': 'solar_radiation',
-  'ΑΝΩΓΕΙΑ Pyranometer 0 - 2000 W/m² (AVG)': 'solar_radiation',
+  // Pressure/Barometer patterns
+  if (header.includes('pressure') || header.includes('barometer')) {
+    return 'pressure';
+  }
   
-  // ETo mappings
-  'ΤΥΜΠΑΚΙ Daily ETo': 'eto',
-  'ΠΟΤΑΜΙΕΣ Daily ETo': 'eto',
-  'ΠΥΡΓΟΣ Daily ETo': 'eto',
-  'ΔΟΞΑΡΟ Daily ETo': 'eto',
-  'ΖΗΡΟΣ Daily ETo': 'eto',
-  'ΑΝΩΓΕΙΑ Daily ETo': 'eto',
+  // Solar radiation/Pyranometer patterns
+  if (header.includes('solar') || header.includes('pyranometer')) {
+    return 'solar_radiation';
+  }
   
-  // Rain duration mappings
-  'ΠΥΡΓΟΣ Rain Duration (SUM)': 'rain_duration',
-  'ΔΟΞΑΡΟ Rain Duration (SUM)': 'rain_duration',
-  'ΖΗΡΟΣ Rain Duration (SUM)': 'rain_duration',
-  'ΑΝΩΓΕΙΑ Rain Duration (SUM)': 'rain_duration',
+  // ETo patterns
+  if (header.includes('eto')) {
+    return 'eto';
+  }
+  
+  // Rain duration patterns
+  if (header.includes('rain') && header.includes('duration')) {
+    return 'rain_duration';
+  }
+  
+  return null;
 }
 
 function parseCSVLine(line: string): string[] {
@@ -150,10 +129,10 @@ function mapRowToReading(headers: string[], row: string[]): MeteoReading | null 
     time: parseTime(row[1])
   };
   
-  // Map other columns based on header names
+  // Map other columns based on header names using dynamic pattern matching
   for (let i = 2; i < headers.length && i < row.length; i++) {
     const header = headers[i];
-    const standardField = columnMappings[header];
+    const standardField = mapColumnToField(header);
     
     if (standardField && row[i]) {
       const value = parseNumericValue(row[i]);
