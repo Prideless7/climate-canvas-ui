@@ -122,10 +122,30 @@ export const Dashboard = () => {
   };
 
   const handleDataCleared = async () => {
-    // Reload stations with data list and current station data after clearing
+    // Reload stations with data list
     await loadStations();
+    
+    // Check if the currently selected station still has data
     if (selectedStation) {
-      await loadStationData(selectedStation);
+      try {
+        const data = await meteorologicalService.getStationDataByTimePeriod(selectedStation, timePeriod);
+        if (data.length === 0) {
+          // Current station has no data, clear selection and data
+          setStationData([]);
+          setSelectedStation("");
+          toast({
+            title: "Data Cleared",
+            description: "The selected station no longer has data. Please select a station with data.",
+          });
+        } else {
+          // Station still has data, reload it
+          setStationData(data);
+        }
+      } catch {
+        // Error loading data, clear selection
+        setStationData([]);
+        setSelectedStation("");
+      }
     }
   };
 
