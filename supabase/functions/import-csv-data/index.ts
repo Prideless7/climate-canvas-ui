@@ -27,6 +27,7 @@ const columnMappings: Record<string, string> = {
   'ΠΥΡΓΟΣ AIR TEMP (AVG)': 'temperature',
   'M02 Temperature (AVG)': 'temperature',
   'M04 Temperature (AVG)': 'temperature',
+  'ΑΝΩΓΕΙΑ Temperature (AVG)': 'temperature',
   
   // Humidity mappings
   'M05 Relative Humidity (AVG)': 'humidity',
@@ -34,6 +35,7 @@ const columnMappings: Record<string, string> = {
   'ΠΥΡΓΟΣ Humidity (AVG)': 'humidity',
   'ΔΟΞΑΡΟ Relative Humidity': 'humidity',
   'M04 Relative Humidity (AVG)': 'humidity',
+  'ΑΝΩΓΕΙΑ Relative Humidity (AVG)': 'humidity',
   
   // Precipitation mappings
   'M05 Precipitation (SUM)': 'precipitation',
@@ -41,6 +43,7 @@ const columnMappings: Record<string, string> = {
   'ΠΥΡΓΟΣ Rain (SUM)': 'precipitation',
   'M02 Precipitation (SUM)': 'precipitation',
   'M04 Precipitation (SUM)': 'precipitation',
+  'ΑΝΩΓΕΙΑ Precipitation (SUM)': 'precipitation',
   
   // Wind speed mappings
   'M05 WIND SPEED (AVG)': 'wind_speed',
@@ -48,6 +51,7 @@ const columnMappings: Record<string, string> = {
   'ΠΥΡΓΟΣ WIND SPEED (AVG)': 'wind_speed',
   'M02 WIND SPEED (AVG)': 'wind_speed',
   'M04 WIND SPEED (AVG)': 'wind_speed',
+  'ΑΝΩΓΕΙΑ WIND SPEED (AVG)': 'wind_speed',
   
   // Wind direction mappings
   'ΤΥΜΠΑΚΙ WIND DIRECTION (AVG)': 'wind_direction',
@@ -55,6 +59,7 @@ const columnMappings: Record<string, string> = {
   'ΠΥΡΓΟΣ WIND DΙRECTION (AVG)': 'wind_direction',
   'ΔΟΞΑΡΟ WIND DIRECTION (AVG)': 'wind_direction',
   'ΖΗΡΟΣ WIND DIRECTION (AVG)': 'wind_direction',
+  'ΑΝΩΓΕΙΑ WIND DIRECTION (AVG)': 'wind_direction',
   
   // Pressure mappings
   'M05 Barometric Pressure (AVG)': 'pressure',
@@ -62,6 +67,7 @@ const columnMappings: Record<string, string> = {
   'ΠΥΡΓΟΣ BAROMETER (AVG)': 'pressure',
   'M02 Barometric Pressure (AVG)': 'pressure',
   'M04 Barometric Pressure (AVG)': 'pressure',
+  'ΑΝΩΓΕΙΑ Barometric Pressure (AVG)': 'pressure',
   
   // Solar radiation mappings
   'M05 Pyranometer 0 - 2000 W/m² (AVG)': 'solar_radiation',
@@ -69,6 +75,7 @@ const columnMappings: Record<string, string> = {
   'ΠΥΡΓΟΣ SOLAR (AVG)': 'solar_radiation',
   'M02 Pyranometer 0 - 2000 W/m² (AVG)': 'solar_radiation',
   'M04 Pyranometer 0 - 2000 W/m² (AVG)': 'solar_radiation',
+  'ΑΝΩΓΕΙΑ Pyranometer 0 - 2000 W/m² (AVG)': 'solar_radiation',
   
   // ETo mappings
   'ΤΥΜΠΑΚΙ Daily ETo': 'eto',
@@ -76,11 +83,13 @@ const columnMappings: Record<string, string> = {
   'ΠΥΡΓΟΣ Daily ETo': 'eto',
   'ΔΟΞΑΡΟ Daily ETo': 'eto',
   'ΖΗΡΟΣ Daily ETo': 'eto',
+  'ΑΝΩΓΕΙΑ Daily ETo': 'eto',
   
   // Rain duration mappings
   'ΠΥΡΓΟΣ Rain Duration (SUM)': 'rain_duration',
   'ΔΟΞΑΡΟ Rain Duration (SUM)': 'rain_duration',
   'ΖΗΡΟΣ Rain Duration (SUM)': 'rain_duration',
+  'ΑΝΩΓΕΙΑ Rain Duration (SUM)': 'rain_duration',
 }
 
 function parseCSVLine(line: string): string[] {
