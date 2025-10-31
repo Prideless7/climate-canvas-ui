@@ -42,10 +42,10 @@ const transformData = (data: MeteoData[]) => {
     }
     
     const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-    const month = date.toLocaleDateString('en', { month: 'short', year: 'numeric' });
+    const month = date.toLocaleDateString('en', { month: 'short' });
     
     if (!acc[yearMonth]) {
-      acc[yearMonth] = { temps: [], month };
+      acc[yearMonth] = { temps: [], month, sortKey: date.getMonth() };
     }
     
     // Ensure temperature is a number
@@ -55,14 +55,16 @@ const transformData = (data: MeteoData[]) => {
     }
     
     return acc;
-  }, {} as Record<string, { temps: number[]; month: string }>);
+  }, {} as Record<string, { temps: number[]; month: string; sortKey: number }>);
 
-  const result = Object.values(monthlyData).map(({ month, temps }) => ({
-    month,
-    avgTemp: Number((temps.reduce((s, t) => s + t, 0) / temps.length).toFixed(1)),
-    maxTemp: Number(Math.max(...temps).toFixed(1)),
-    minTemp: Number(Math.min(...temps).toFixed(1))
-  }));
+  const result = Object.values(monthlyData)
+    .sort((a, b) => a.sortKey - b.sortKey)
+    .map(({ month, temps }) => ({
+      month,
+      avgTemp: Number((temps.reduce((s, t) => s + t, 0) / temps.length).toFixed(1)),
+      maxTemp: Number(Math.max(...temps).toFixed(1)),
+      minTemp: Number(Math.min(...temps).toFixed(1))
+    }));
   
   console.log('Transformed temperature data:', result);
   return result;

@@ -15,21 +15,23 @@ const transformData = (data: MeteoData[]) => {
   const monthlyData = data.reduce((acc, item) => {
     const date = new Date(item.date.split('/').reverse().join('-'));
     const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-    const month = date.toLocaleDateString('en', { month: 'short', year: 'numeric' });
+    const month = date.toLocaleDateString('en', { month: 'short' });
     
     if (!acc[yearMonth]) {
-      acc[yearMonth] = { rainfall: 0, days: 0, month };
+      acc[yearMonth] = { rainfall: 0, days: 0, month, sortKey: date.getMonth() };
     }
     acc[yearMonth].rainfall += item.precipitation;
     if (item.precipitation > 0) acc[yearMonth].days += 1;
     return acc;
-  }, {} as Record<string, { rainfall: number; days: number; month: string }>);
+  }, {} as Record<string, { rainfall: number; days: number; month: string; sortKey: number }>);
 
-  return Object.values(monthlyData).map(({ month, rainfall, days }) => ({
-    month,
-    rainfall: Number(rainfall.toFixed(1)),
-    days
-  }));
+  return Object.values(monthlyData)
+    .sort((a, b) => a.sortKey - b.sortKey)
+    .map(({ month, rainfall, days }) => ({
+      month,
+      rainfall: Number(rainfall.toFixed(1)),
+      days
+    }));
 };
 
 export const RainfallChart = ({ data, detailed = false }: RainfallChartProps) => {

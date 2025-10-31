@@ -17,21 +17,23 @@ const transformData = (data: MeteoData[]) => {
       ? new Date(item.date.split('/').reverse().join('-'))
       : new Date(item.date);
     const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-    const month = date.toLocaleDateString('en', { month: 'short', year: 'numeric' });
+    const month = date.toLocaleDateString('en', { month: 'short' });
     
     if (!acc[yearMonth]) {
-      acc[yearMonth] = { humidities: [], month };
+      acc[yearMonth] = { humidities: [], month, sortKey: date.getMonth() };
     }
     acc[yearMonth].humidities.push(item.humidity);
     return acc;
-  }, {} as Record<string, { humidities: number[]; month: string }>);
+  }, {} as Record<string, { humidities: number[]; month: string; sortKey: number }>);
 
-  return Object.values(monthlyData).map(({ month, humidities }) => ({
-    month,
-    avgHumidity: Number((humidities.reduce((s, h) => s + h, 0) / humidities.length).toFixed(1)),
-    maxHumidity: Number(Math.max(...humidities).toFixed(1)),
-    minHumidity: Number(Math.min(...humidities).toFixed(1))
-  }));
+  return Object.values(monthlyData)
+    .sort((a, b) => a.sortKey - b.sortKey)
+    .map(({ month, humidities }) => ({
+      month,
+      avgHumidity: Number((humidities.reduce((s, h) => s + h, 0) / humidities.length).toFixed(1)),
+      maxHumidity: Number(Math.max(...humidities).toFixed(1)),
+      minHumidity: Number(Math.min(...humidities).toFixed(1))
+    }));
 };
 
 export const HumidityChart = ({ data, detailed = false }: HumidityChartProps) => {

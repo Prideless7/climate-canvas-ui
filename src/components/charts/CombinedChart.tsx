@@ -15,25 +15,27 @@ const transformData = (data: MeteoData[]) => {
   const monthlyData = data.reduce((acc, item) => {
     const date = new Date(item.date.split('/').reverse().join('-'));
     const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-    const month = date.toLocaleDateString('en', { month: 'short', year: 'numeric' });
+    const month = date.toLocaleDateString('en', { month: 'short' });
     
     if (!acc[yearMonth]) {
-      acc[yearMonth] = { temps: [], humidities: [], radiations: [], rainfalls: [], month };
+      acc[yearMonth] = { temps: [], humidities: [], radiations: [], rainfalls: [], month, sortKey: date.getMonth() };
     }
     acc[yearMonth].temps.push(item.temperature);
     acc[yearMonth].humidities.push(item.humidity);
     acc[yearMonth].radiations.push(item.solarRadiation);
     acc[yearMonth].rainfalls.push(item.precipitation);
     return acc;
-  }, {} as Record<string, { temps: number[]; humidities: number[]; radiations: number[]; rainfalls: number[]; month: string }>);
+  }, {} as Record<string, { temps: number[]; humidities: number[]; radiations: number[]; rainfalls: number[]; month: string; sortKey: number }>);
 
-  return Object.values(monthlyData).map(({ month, temps, humidities, radiations, rainfalls }) => ({
-    month,
-    temp: Number((temps.reduce((s, t) => s + t, 0) / temps.length).toFixed(1)),
-    humidity: Number((humidities.reduce((s, h) => s + h, 0) / humidities.length).toFixed(1)),
-    radiation: Number((radiations.reduce((s, r) => s + r, 0) / radiations.length * 0.0864).toFixed(1)),
-    rainfall: Number((rainfalls.reduce((s, r) => s + r, 0)).toFixed(1))
-  }));
+  return Object.values(monthlyData)
+    .sort((a, b) => a.sortKey - b.sortKey)
+    .map(({ month, temps, humidities, radiations, rainfalls }) => ({
+      month,
+      temp: Number((temps.reduce((s, t) => s + t, 0) / temps.length).toFixed(1)),
+      humidity: Number((humidities.reduce((s, h) => s + h, 0) / humidities.length).toFixed(1)),
+      radiation: Number((radiations.reduce((s, r) => s + r, 0) / radiations.length * 0.0864).toFixed(1)),
+      rainfall: Number((rainfalls.reduce((s, r) => s + r, 0)).toFixed(1))
+    }));
 };
 
 export const CombinedChart = ({ data, detailed = false }: CombinedChartProps) => {

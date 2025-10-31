@@ -21,24 +21,26 @@ const transformData = (data: MeteoData[]) => {
       ? new Date(item.date.split('/').reverse().join('-'))
       : new Date(item.date);
     const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-    const month = date.toLocaleDateString('en', { month: 'short', year: 'numeric' });
+    const month = date.toLocaleDateString('en', { month: 'short' });
     
     if (!acc[yearMonth]) {
-      acc[yearMonth] = { radiations: [], month };
+      acc[yearMonth] = { radiations: [], month, sortKey: date.getMonth() };
     }
     acc[yearMonth].radiations.push(item.solarRadiation);
     return acc;
-  }, {} as Record<string, { radiations: number[]; month: string }>);
+  }, {} as Record<string, { radiations: number[]; month: string; sortKey: number }>);
 
-  const result = Object.values(monthlyData).map(({ month, radiations }) => {
-    const avgRadiation = radiations.reduce((s, r) => s + r, 0) / radiations.length;
-    return {
-      month,
-      radiation: Number((avgRadiation * 0.0864).toFixed(1)), // Convert W/m² to MJ/m²/day
-      peakHours: Math.min(12, Number((avgRadiation / 100).toFixed(1))),
-      uvIndex: Math.min(11, Number((avgRadiation / 25).toFixed(1)))
-    };
-  });
+  const result = Object.values(monthlyData)
+    .sort((a, b) => a.sortKey - b.sortKey)
+    .map(({ month, radiations }) => {
+      const avgRadiation = radiations.reduce((s, r) => s + r, 0) / radiations.length;
+      return {
+        month,
+        radiation: Number((avgRadiation * 0.0864).toFixed(1)), // Convert W/m² to MJ/m²/day
+        peakHours: Math.min(12, Number((avgRadiation / 100).toFixed(1))),
+        uvIndex: Math.min(11, Number((avgRadiation / 25).toFixed(1)))
+      };
+    });
   
   console.log('SolarRadiationChart - Transformed data:', result);
   return result;
