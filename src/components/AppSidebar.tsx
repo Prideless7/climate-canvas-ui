@@ -7,7 +7,6 @@ import {
   Droplets,
   TrendingUp,
   Database,
-  Settings,
   Upload,
 } from "lucide-react";
 import {
@@ -66,11 +65,6 @@ const dataItems = [
     title: "Database",
     icon: Database,
     id: "database",
-  },
-  {
-    title: "Settings",
-    icon: Settings,
-    id: "settings",
   },
 ];
 
