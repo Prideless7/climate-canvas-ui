@@ -29,7 +29,8 @@ export const Dashboard = () => {
   const [availableStations, setAvailableStations] = useState<string[]>([]);
   const [stationsWithData, setStationsWithData] = useState<string[]>([]);
   const [isDataImported, setIsDataImported] = useState(false);
-  const [timePeriod, setTimePeriod] = useState("all");
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
+  const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
   const [currentView, setCurrentView] = useState("import");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -67,12 +68,19 @@ export const Dashboard = () => {
     }
   };
 
-  const loadStationData = async (stationId: string) => {
+  const loadStationData = async (stationId: string, year: number | null = selectedYear, month: number | null = selectedMonth) => {
     if (!stationId) return;
     
     setIsLoading(true);
     try {
-      const data = await meteorologicalService.getStationDataByTimePeriod(stationId, timePeriod);
+      let data;
+      if (year && month) {
+        data = await meteorologicalService.getStationDataByTimePeriod(stationId, "month", year, month);
+      } else if (year) {
+        data = await meteorologicalService.getStationDataByTimePeriod(stationId, "year", year);
+      } else {
+        data = await meteorologicalService.getStationDataByTimePeriod(stationId, "all");
+      }
       setStationData(data);
     } catch (error: any) {
       console.error('Error loading station data:', error);
@@ -106,18 +114,18 @@ export const Dashboard = () => {
     await loadStationData(stationId);
   };
 
-  const handleTimePeriodChange = async (newTimePeriod: string) => {
-    setTimePeriod(newTimePeriod);
+  const handleYearChange = async (year: number | null) => {
+    setSelectedYear(year);
+    setSelectedMonth(null); // Reset month when year changes
     if (selectedStation) {
-      await loadStationData(selectedStation);
+      await loadStationData(selectedStation, year, null);
     }
   };
 
-  const handleAdvancedFilter = async (filterType: string, year?: number, month?: number) => {
-    setTimePeriod(filterType);
-    if (selectedStation) {
-      const data = await meteorologicalService.getStationDataByTimePeriod(selectedStation, filterType, year, month);
-      setStationData(data);
+  const handleMonthChange = async (month: number | null) => {
+    setSelectedMonth(month);
+    if (selectedStation && selectedYear) {
+      await loadStationData(selectedStation, selectedYear, month);
     }
   };
 
@@ -128,8 +136,8 @@ export const Dashboard = () => {
     // Check if the currently selected station still has data
     if (selectedStation) {
       try {
-        const data = await meteorologicalService.getStationDataByTimePeriod(selectedStation, timePeriod);
-        if (data.length === 0) {
+        await loadStationData(selectedStation);
+        if (stationData.length === 0) {
           // Current station has no data, clear selection and data
           setStationData([]);
           setSelectedStation("");
@@ -137,9 +145,6 @@ export const Dashboard = () => {
             title: "Data Cleared",
             description: "The selected station no longer has data. Please select a station with data.",
           });
-        } else {
-          // Station still has data, reload it
-          setStationData(data);
         }
       } catch {
         // Error loading data, clear selection
@@ -168,9 +173,10 @@ export const Dashboard = () => {
               isDarkMode={isDarkMode} 
               toggleTheme={toggleTheme}
               selectedStation={selectedStation}
-              timePeriod={timePeriod}
-              onTimePeriodChange={handleTimePeriodChange}
-              onAdvancedFilter={handleAdvancedFilter}
+              selectedYear={selectedYear}
+              selectedMonth={selectedMonth}
+              onYearChange={handleYearChange}
+              onMonthChange={handleMonthChange}
               onDataCleared={handleDataCleared}
             />
             {currentView === "import" ? (
@@ -184,7 +190,7 @@ export const Dashboard = () => {
                 stationData={stationData}
                 availableStations={availableStations}
                 currentView={currentView}
-                timePeriod={timePeriod}
+                timePeriod={selectedYear && selectedMonth ? `${selectedYear}-${selectedMonth}` : selectedYear ? `${selectedYear}` : "all"}
                 stationsWithData={stationsWithData}
               />
             )}

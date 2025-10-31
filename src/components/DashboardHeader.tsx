@@ -1,5 +1,5 @@
 
-import { Moon, Sun, Upload, Calendar, LogOut } from "lucide-react";
+import { Moon, Sun, Upload, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
@@ -10,7 +10,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { AdvancedFilters } from "./AdvancedFilters";
 import { ClearDataButtons } from "./ClearDataButtons";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -21,13 +20,14 @@ interface DashboardHeaderProps {
   isDarkMode: boolean;
   toggleTheme: () => void;
   selectedStation: string;
-  timePeriod: string;
-  onTimePeriodChange: (period: string) => void;
-  onAdvancedFilter: (filterType: string, year?: number, month?: number) => void;
+  selectedYear: number | null;
+  selectedMonth: number | null;
+  onYearChange: (year: number | null) => void;
+  onMonthChange: (month: number | null) => void;
   onDataCleared: () => void;
 }
 
-export const DashboardHeader = ({ isDarkMode, toggleTheme, selectedStation, timePeriod, onTimePeriodChange, onAdvancedFilter, onDataCleared }: DashboardHeaderProps) => {
+export const DashboardHeader = ({ isDarkMode, toggleTheme, selectedStation, selectedYear, selectedMonth, onYearChange, onMonthChange, onDataCleared }: DashboardHeaderProps) => {
   const { user, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -44,6 +44,25 @@ export const DashboardHeader = ({ isDarkMode, toggleTheme, selectedStation, time
     });
     navigate("/auth");
   };
+
+  // Generate years from 2020 to current year
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: currentYear - 2019 }, (_, i) => 2020 + i);
+  
+  const months = [
+    { value: 1, label: "January" },
+    { value: 2, label: "February" },
+    { value: 3, label: "March" },
+    { value: 4, label: "April" },
+    { value: 5, label: "May" },
+    { value: 6, label: "June" },
+    { value: 7, label: "July" },
+    { value: 8, label: "August" },
+    { value: 9, label: "September" },
+    { value: 10, label: "October" },
+    { value: 11, label: "November" },
+    { value: 12, label: "December" },
+  ];
 
   return (
     <header className="h-16 border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
@@ -62,24 +81,37 @@ export const DashboardHeader = ({ isDarkMode, toggleTheme, selectedStation, time
         </div>
 
         <div className="flex items-center gap-2">
-          <Select value={timePeriod} onValueChange={onTimePeriodChange}>
+          <Select 
+            value={selectedYear?.toString() || "all"} 
+            onValueChange={(value) => onYearChange(value === "all" ? null : parseInt(value))}
+          >
             <SelectTrigger className="w-32">
-              <Calendar className="w-4 h-4" />
-              <SelectValue placeholder="Period" />
+              <SelectValue placeholder="Select Year" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Data</SelectItem>
-              <SelectItem value="7d">Last 7 days</SelectItem>
-              <SelectItem value="30d">Last 30 days</SelectItem>
-              <SelectItem value="90d">Last 3 months</SelectItem>
-              <SelectItem value="1y">Last year</SelectItem>
+              <SelectItem value="all">All Years</SelectItem>
+              {years.map(year => (
+                <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
 
-          <AdvancedFilters 
-            onFilterChange={onAdvancedFilter}
-            currentFilter={timePeriod}
-          />
+          {selectedYear && (
+            <Select 
+              value={selectedMonth?.toString() || "all"} 
+              onValueChange={(value) => onMonthChange(value === "all" ? null : parseInt(value))}
+            >
+              <SelectTrigger className="w-36">
+                <SelectValue placeholder="Select Month" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Months</SelectItem>
+                {months.map(month => (
+                  <SelectItem key={month.value} value={month.value.toString()}>{month.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
 
           <ClearDataButtons
             selectedStation={selectedStation}
