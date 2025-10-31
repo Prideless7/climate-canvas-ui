@@ -1,5 +1,5 @@
 
-import { Moon, Sun, Upload, LogOut } from "lucide-react";
+import { Moon, Sun, Upload, LogOut, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
@@ -9,12 +9,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ClearDataButtons } from "./ClearDataButtons";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useStations } from "@/hooks/useStations";
+import { useState } from "react";
 
 interface DashboardHeaderProps {
   isDarkMode: boolean;
@@ -32,6 +40,10 @@ export const DashboardHeader = ({ isDarkMode, toggleTheme, selectedStation, sele
   const navigate = useNavigate();
   const { toast } = useToast();
   const { stations } = useStations();
+  const [filterMode, setFilterMode] = useState<"year" | "month">("year");
+  const [tempYear, setTempYear] = useState<number | null>(selectedYear);
+  const [tempMonth, setTempMonth] = useState<number | null>(selectedMonth);
+  const [isOpen, setIsOpen] = useState(false);
   
   const currentStation = stations.find(s => s.id === selectedStation);
   const stationDisplayName = currentStation?.name || "Unknown Station";
@@ -43,6 +55,25 @@ export const DashboardHeader = ({ isDarkMode, toggleTheme, selectedStation, sele
       description: "You have been successfully logged out.",
     });
     navigate("/auth");
+  };
+
+  const handleApplyFilter = () => {
+    if (filterMode === "year") {
+      onYearChange(tempYear);
+      onMonthChange(null);
+    } else {
+      onYearChange(tempYear);
+      onMonthChange(tempMonth);
+    }
+    setIsOpen(false);
+  };
+
+  const handleClearFilter = () => {
+    setTempYear(null);
+    setTempMonth(null);
+    onYearChange(null);
+    onMonthChange(null);
+    setIsOpen(false);
   };
 
   // Generate years from 2020 to current year
@@ -81,37 +112,84 @@ export const DashboardHeader = ({ isDarkMode, toggleTheme, selectedStation, sele
         </div>
 
         <div className="flex items-center gap-2">
-          <Select 
-            value={selectedYear?.toString() || "all"} 
-            onValueChange={(value) => onYearChange(value === "all" ? null : parseInt(value))}
-          >
-            <SelectTrigger className="w-32">
-              <SelectValue placeholder="Select Year" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Years</SelectItem>
-              {years.map(year => (
-                <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Popover open={isOpen} onOpenChange={setIsOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Filter className="w-4 h-4" />
+                Filters
+                {(selectedYear || selectedMonth) && (
+                  <Badge variant="secondary" className="ml-2 h-5 px-1 text-xs">
+                    {selectedMonth ? `${selectedYear}/${selectedMonth}` : selectedYear}
+                  </Badge>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <h4 className="font-medium">Filter Data</h4>
+                  <RadioGroup value={filterMode} onValueChange={(value) => setFilterMode(value as "year" | "month")}>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="year" id="year" />
+                      <Label htmlFor="year">By Year</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="month" id="month" />
+                      <Label htmlFor="month">By Year and Month</Label>
+                    </div>
+                  </RadioGroup>
+                </div>
 
-          {selectedYear && (
-            <Select 
-              value={selectedMonth?.toString() || "all"} 
-              onValueChange={(value) => onMonthChange(value === "all" ? null : parseInt(value))}
-            >
-              <SelectTrigger className="w-36">
-                <SelectValue placeholder="Select Month" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Months</SelectItem>
-                {months.map(month => (
-                  <SelectItem key={month.value} value={month.value.toString()}>{month.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Label>Year</Label>
+                    <Select 
+                      value={tempYear?.toString() || ""} 
+                      onValueChange={(value) => setTempYear(parseInt(value))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Year" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {years.map(year => (
+                          <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {filterMode === "month" && (
+                    <div className="space-y-2">
+                      <Label>Month</Label>
+                      <Select 
+                        value={tempMonth?.toString() || ""} 
+                        onValueChange={(value) => setTempMonth(parseInt(value))}
+                        disabled={!tempYear}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Month" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {months.map(month => (
+                            <SelectItem key={month.value} value={month.value.toString()}>{month.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex gap-2">
+                  <Button onClick={handleApplyFilter} disabled={!tempYear} className="flex-1">
+                    Apply
+                  </Button>
+                  <Button onClick={handleClearFilter} variant="outline">
+                    Clear
+                  </Button>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
 
           <ClearDataButtons
             selectedStation={selectedStation}
