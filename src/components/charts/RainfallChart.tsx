@@ -14,16 +14,16 @@ const transformData = (data: MeteoData[]) => {
 
   const monthlyData = data.reduce((acc, item) => {
     const date = new Date(item.date.split('/').reverse().join('-'));
-    const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    const monthIndex = date.getMonth();
     const month = date.toLocaleDateString('en', { month: 'short' });
     
-    if (!acc[yearMonth]) {
-      acc[yearMonth] = { rainfall: 0, days: 0, month, sortKey: date.getMonth() };
+    if (!acc[monthIndex]) {
+      acc[monthIndex] = { rainfall: 0, days: 0, month, sortKey: monthIndex };
     }
-    acc[yearMonth].rainfall += item.precipitation;
-    if (item.precipitation > 0) acc[yearMonth].days += 1;
+    acc[monthIndex].rainfall += item.precipitation;
+    if (item.precipitation > 0) acc[monthIndex].days += 1;
     return acc;
-  }, {} as Record<string, { rainfall: number; days: number; month: string; sortKey: number }>);
+  }, {} as Record<number, { rainfall: number; days: number; month: string; sortKey: number }>);
 
   return Object.values(monthlyData)
     .sort((a, b) => a.sortKey - b.sortKey)

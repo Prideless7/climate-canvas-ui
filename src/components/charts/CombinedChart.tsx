@@ -14,18 +14,18 @@ const transformData = (data: MeteoData[]) => {
 
   const monthlyData = data.reduce((acc, item) => {
     const date = new Date(item.date.split('/').reverse().join('-'));
-    const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    const monthIndex = date.getMonth();
     const month = date.toLocaleDateString('en', { month: 'short' });
     
-    if (!acc[yearMonth]) {
-      acc[yearMonth] = { temps: [], humidities: [], radiations: [], rainfalls: [], month, sortKey: date.getMonth() };
+    if (!acc[monthIndex]) {
+      acc[monthIndex] = { temps: [], humidities: [], radiations: [], rainfalls: [], month, sortKey: monthIndex };
     }
-    acc[yearMonth].temps.push(item.temperature);
-    acc[yearMonth].humidities.push(item.humidity);
-    acc[yearMonth].radiations.push(item.solarRadiation);
-    acc[yearMonth].rainfalls.push(item.precipitation);
+    acc[monthIndex].temps.push(item.temperature);
+    acc[monthIndex].humidities.push(item.humidity);
+    acc[monthIndex].radiations.push(item.solarRadiation);
+    acc[monthIndex].rainfalls.push(item.precipitation);
     return acc;
-  }, {} as Record<string, { temps: number[]; humidities: number[]; radiations: number[]; rainfalls: number[]; month: string; sortKey: number }>);
+  }, {} as Record<number, { temps: number[]; humidities: number[]; radiations: number[]; rainfalls: number[]; month: string; sortKey: number }>);
 
   return Object.values(monthlyData)
     .sort((a, b) => a.sortKey - b.sortKey)

@@ -41,21 +41,21 @@ const transformData = (data: MeteoData[]) => {
       return acc;
     }
     
-    const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    const monthIndex = date.getMonth();
     const month = date.toLocaleDateString('en', { month: 'short' });
     
-    if (!acc[yearMonth]) {
-      acc[yearMonth] = { temps: [], month, sortKey: date.getMonth() };
+    if (!acc[monthIndex]) {
+      acc[monthIndex] = { temps: [], month, sortKey: monthIndex };
     }
     
     // Ensure temperature is a number
     const temp = Number(item.temperature);
     if (!isNaN(temp)) {
-      acc[yearMonth].temps.push(temp);
+      acc[monthIndex].temps.push(temp);
     }
     
     return acc;
-  }, {} as Record<string, { temps: number[]; month: string; sortKey: number }>);
+  }, {} as Record<number, { temps: number[]; month: string; sortKey: number }>);
 
   const result = Object.values(monthlyData)
     .sort((a, b) => a.sortKey - b.sortKey)

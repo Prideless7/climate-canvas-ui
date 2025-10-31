@@ -20,15 +20,15 @@ const transformData = (data: MeteoData[]) => {
     const date = item.date.includes('/') 
       ? new Date(item.date.split('/').reverse().join('-'))
       : new Date(item.date);
-    const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    const monthIndex = date.getMonth();
     const month = date.toLocaleDateString('en', { month: 'short' });
     
-    if (!acc[yearMonth]) {
-      acc[yearMonth] = { radiations: [], month, sortKey: date.getMonth() };
+    if (!acc[monthIndex]) {
+      acc[monthIndex] = { radiations: [], month, sortKey: monthIndex };
     }
-    acc[yearMonth].radiations.push(item.solarRadiation);
+    acc[monthIndex].radiations.push(item.solarRadiation);
     return acc;
-  }, {} as Record<string, { radiations: number[]; month: string; sortKey: number }>);
+  }, {} as Record<number, { radiations: number[]; month: string; sortKey: number }>);
 
   const result = Object.values(monthlyData)
     .sort((a, b) => a.sortKey - b.sortKey)
