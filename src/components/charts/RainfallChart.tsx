@@ -15,22 +15,25 @@ const transformData = (data: MeteoData[]) => {
   const monthlyData = data.reduce((acc, item) => {
     const date = new Date(item.date.split('/').reverse().join('-'));
     const monthIndex = date.getMonth();
+    const dayOfMonth = date.getDate();
     const month = date.toLocaleDateString('en', { month: 'short' });
     
     if (!acc[monthIndex]) {
-      acc[monthIndex] = { rainfall: 0, days: 0, month, sortKey: monthIndex };
+      acc[monthIndex] = { rainfall: 0, rainyDays: new Set(), month, sortKey: monthIndex };
     }
     acc[monthIndex].rainfall += item.precipitation;
-    if (item.precipitation > 0) acc[monthIndex].days += 1;
+    if (item.precipitation > 0) {
+      acc[monthIndex].rainyDays.add(dayOfMonth);
+    }
     return acc;
-  }, {} as Record<number, { rainfall: number; days: number; month: string; sortKey: number }>);
+  }, {} as Record<number, { rainfall: number; rainyDays: Set<number>; month: string; sortKey: number }>);
 
   return Object.values(monthlyData)
     .sort((a, b) => a.sortKey - b.sortKey)
-    .map(({ month, rainfall, days }) => ({
+    .map(({ month, rainfall, rainyDays }) => ({
       month,
       rainfall: Number(rainfall.toFixed(1)),
-      days
+      days: rainyDays.size
     }));
 };
 
