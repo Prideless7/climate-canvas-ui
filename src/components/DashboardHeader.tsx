@@ -76,9 +76,8 @@ export const DashboardHeader = ({ isDarkMode, toggleTheme, selectedStation, sele
     setIsOpen(false);
   };
 
-  // Generate years from 2020 to current year
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: currentYear - 2019 }, (_, i) => 2020 + i);
+  // Generate years from 2015 to 2025
+  const years = Array.from({ length: 11 }, (_, i) => 2015 + i);
   
   const months = [
     { value: 1, label: "January" },
