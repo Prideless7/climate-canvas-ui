@@ -69,18 +69,24 @@ export const CombinedChart = ({ data, detailed = false }: CombinedChartProps) =>
             border: '1px solid hsl(var(--border))',
             borderRadius: '6px'
           }}
-          formatter={(value, name) => [
-            `${typeof value === 'number' ? value.toFixed(1) : value}${
-              name === 'temp' ? '°C' : 
-              name === 'humidity' ? '%' : 
-              name === 'radiation' ? ' MJ/m²' : 
-              'mm'
-            }`,
-            name === 'temp' ? 'Temperature' : 
-            name === 'humidity' ? 'Humidity' : 
-            name === 'radiation' ? 'Solar Radiation' : 
-            'Rainfall'
-          ]}
+          formatter={(value: any, name: any) => {
+            const labels: Record<string, string> = {
+              'temp': 'Temperature',
+              'humidity': 'Humidity',
+              'radiation': 'Solar Radiation',
+              'rainfall': 'Rainfall'
+            };
+            const units: Record<string, string> = {
+              'temp': '°C',
+              'humidity': '%',
+              'radiation': ' MJ/m²',
+              'rainfall': ' mm'
+            };
+            return [
+              `${typeof value === 'number' ? value.toFixed(1) : value}${units[name] || ''}`,
+              labels[name] || name
+            ];
+          }}
         />
         <Legend />
         
