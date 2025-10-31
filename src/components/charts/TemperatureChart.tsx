@@ -41,16 +41,17 @@ const transformData = (data: MeteoData[]) => {
       return acc;
     }
     
-    const month = date.toLocaleDateString('en', { month: 'short' });
+    const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    const month = date.toLocaleDateString('en', { month: 'short', year: 'numeric' });
     
-    if (!acc[month]) {
-      acc[month] = { temps: [], month };
+    if (!acc[yearMonth]) {
+      acc[yearMonth] = { temps: [], month };
     }
     
     // Ensure temperature is a number
     const temp = Number(item.temperature);
     if (!isNaN(temp)) {
-      acc[month].temps.push(temp);
+      acc[yearMonth].temps.push(temp);
     }
     
     return acc;

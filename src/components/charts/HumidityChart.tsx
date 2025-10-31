@@ -16,12 +16,13 @@ const transformData = (data: MeteoData[]) => {
     const date = item.date.includes('/') 
       ? new Date(item.date.split('/').reverse().join('-'))
       : new Date(item.date);
-    const month = date.toLocaleDateString('en', { month: 'short' });
+    const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    const month = date.toLocaleDateString('en', { month: 'short', year: 'numeric' });
     
-    if (!acc[month]) {
-      acc[month] = { humidities: [], month };
+    if (!acc[yearMonth]) {
+      acc[yearMonth] = { humidities: [], month };
     }
-    acc[month].humidities.push(item.humidity);
+    acc[yearMonth].humidities.push(item.humidity);
     return acc;
   }, {} as Record<string, { humidities: number[]; month: string }>);
 

@@ -20,12 +20,13 @@ const transformData = (data: MeteoData[]) => {
     const date = item.date.includes('/') 
       ? new Date(item.date.split('/').reverse().join('-'))
       : new Date(item.date);
-    const month = date.toLocaleDateString('en', { month: 'short' });
+    const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    const month = date.toLocaleDateString('en', { month: 'short', year: 'numeric' });
     
-    if (!acc[month]) {
-      acc[month] = { radiations: [], month };
+    if (!acc[yearMonth]) {
+      acc[yearMonth] = { radiations: [], month };
     }
-    acc[month].radiations.push(item.solarRadiation);
+    acc[yearMonth].radiations.push(item.solarRadiation);
     return acc;
   }, {} as Record<string, { radiations: number[]; month: string }>);
 

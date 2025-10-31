@@ -14,13 +14,14 @@ const transformData = (data: MeteoData[]) => {
 
   const monthlyData = data.reduce((acc, item) => {
     const date = new Date(item.date.split('/').reverse().join('-'));
-    const month = date.toLocaleDateString('en', { month: 'short' });
+    const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    const month = date.toLocaleDateString('en', { month: 'short', year: 'numeric' });
     
-    if (!acc[month]) {
-      acc[month] = { rainfall: 0, days: 0, month };
+    if (!acc[yearMonth]) {
+      acc[yearMonth] = { rainfall: 0, days: 0, month };
     }
-    acc[month].rainfall += item.precipitation;
-    if (item.precipitation > 0) acc[month].days += 1;
+    acc[yearMonth].rainfall += item.precipitation;
+    if (item.precipitation > 0) acc[yearMonth].days += 1;
     return acc;
   }, {} as Record<string, { rainfall: number; days: number; month: string }>);
 
