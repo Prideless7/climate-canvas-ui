@@ -42,8 +42,27 @@ export const CombinedChart = ({ data, detailed = false }: CombinedChartProps) =>
     <ResponsiveContainer width="100%" height={detailed ? 500 : 400}>
       <ComposedChart data={chartData}>
         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-        <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" />
-        <YAxis stroke="hsl(var(--muted-foreground))" />
+        <XAxis 
+          dataKey="month" 
+          stroke="hsl(var(--muted-foreground))"
+          style={{ fontSize: '12px' }}
+        />
+        
+        {/* Left Y-axis for Temperature, Humidity, Radiation */}
+        <YAxis 
+          yAxisId="left"
+          stroke="hsl(var(--muted-foreground))"
+          label={{ value: 'Temp (°C) / Humidity (%) / Radiation (MJ/m²)', angle: -90, position: 'insideLeft', style: { fontSize: '12px' } }}
+        />
+        
+        {/* Right Y-axis for Rainfall */}
+        <YAxis 
+          yAxisId="right"
+          orientation="right"
+          stroke="hsl(var(--rainfall))"
+          label={{ value: 'Rainfall (mm)', angle: 90, position: 'insideRight', style: { fontSize: '12px' } }}
+        />
+        
         <Tooltip 
           contentStyle={{ 
             backgroundColor: 'hsl(var(--card))', 
@@ -51,7 +70,7 @@ export const CombinedChart = ({ data, detailed = false }: CombinedChartProps) =>
             borderRadius: '6px'
           }}
           formatter={(value, name) => [
-            `${value}${
+            `${typeof value === 'number' ? value.toFixed(1) : value}${
               name === 'temp' ? '°C' : 
               name === 'humidity' ? '%' : 
               name === 'radiation' ? ' MJ/m²' : 
@@ -65,38 +84,46 @@ export const CombinedChart = ({ data, detailed = false }: CombinedChartProps) =>
         />
         <Legend />
         
+        {/* Rainfall on right axis */}
         <Bar
+          yAxisId="right"
           dataKey="rainfall"
           fill="hsl(var(--rainfall))"
-          name="Rainfall (mm)"
+          name="Rainfall"
           opacity={0.6}
           radius={[2, 2, 0, 0]}
         />
         
+        {/* Temperature on left axis */}
         <Line
+          yAxisId="left"
           type="monotone"
           dataKey="temp"
           stroke="hsl(var(--temperature))"
           strokeWidth={3}
-          name="Temperature (°C)"
+          name="Temperature"
           dot={{ fill: 'hsl(var(--temperature))', strokeWidth: 2, r: 4 }}
         />
         
+        {/* Humidity on left axis */}
         <Line
+          yAxisId="left"
           type="monotone"
           dataKey="humidity"
           stroke="hsl(var(--humidity))"
           strokeWidth={2}
-          name="Humidity (%)"
+          name="Humidity"
           dot={{ fill: 'hsl(var(--humidity))', strokeWidth: 2, r: 3 }}
         />
         
+        {/* Solar Radiation on left axis */}
         <Line
+          yAxisId="left"
           type="monotone"
           dataKey="radiation"
           stroke="hsl(var(--solar))"
           strokeWidth={2}
-          name="Solar Radiation (MJ/m²)"
+          name="Solar Radiation"
           dot={{ fill: 'hsl(var(--solar))', strokeWidth: 2, r: 3 }}
         />
       </ComposedChart>
