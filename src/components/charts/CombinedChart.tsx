@@ -30,7 +30,7 @@ const transformData = (data: MeteoData[]) => {
     month,
     temp: Number((temps.reduce((s, t) => s + t, 0) / temps.length).toFixed(1)),
     humidity: Number((humidities.reduce((s, h) => s + h, 0) / humidities.length).toFixed(1)),
-    radiation: Number((radiations.reduce((s, r) => s + r, 0) / radiations.length / 1000000 * 24).toFixed(1)),
+    radiation: Number((radiations.reduce((s, r) => s + r, 0) / radiations.length * 0.0864).toFixed(1)),
     rainfall: Number((rainfalls.reduce((s, r) => s + r, 0)).toFixed(1))
   }));
 };
