@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+
 import { ClearDataButtons } from "./ClearDataButtons";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -40,9 +40,7 @@ export const DashboardHeader = ({ isDarkMode, toggleTheme, selectedStation, sele
   const navigate = useNavigate();
   const { toast } = useToast();
   const { stations } = useStations();
-  const [filterMode, setFilterMode] = useState<"year" | "month">("year");
   const [tempYear, setTempYear] = useState<number | null>(selectedYear);
-  const [tempMonth, setTempMonth] = useState<number | null>(selectedMonth);
   const [isOpen, setIsOpen] = useState(false);
   
   const currentStation = stations.find(s => s.id === selectedStation);
@@ -58,19 +56,13 @@ export const DashboardHeader = ({ isDarkMode, toggleTheme, selectedStation, sele
   };
 
   const handleApplyFilter = () => {
-    if (filterMode === "year") {
-      onYearChange(tempYear);
-      onMonthChange(null);
-    } else {
-      onYearChange(tempYear);
-      onMonthChange(tempMonth);
-    }
+    onYearChange(tempYear);
+    onMonthChange(null);
     setIsOpen(false);
   };
 
   const handleClearFilter = () => {
     setTempYear(null);
-    setTempMonth(null);
     onYearChange(null);
     onMonthChange(null);
     setIsOpen(false);
@@ -78,21 +70,6 @@ export const DashboardHeader = ({ isDarkMode, toggleTheme, selectedStation, sele
 
   // Generate years from 2015 to 2025
   const years = Array.from({ length: 11 }, (_, i) => 2015 + i);
-  
-  const months = [
-    { value: 1, label: "January" },
-    { value: 2, label: "February" },
-    { value: 3, label: "March" },
-    { value: 4, label: "April" },
-    { value: 5, label: "May" },
-    { value: 6, label: "June" },
-    { value: 7, label: "July" },
-    { value: 8, label: "August" },
-    { value: 9, label: "September" },
-    { value: 10, label: "October" },
-    { value: 11, label: "November" },
-    { value: 12, label: "December" },
-  ];
 
   return (
     <header className="h-16 border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
@@ -116,9 +93,9 @@ export const DashboardHeader = ({ isDarkMode, toggleTheme, selectedStation, sele
               <Button variant="outline" size="sm">
                 <Filter className="w-4 h-4" />
                 Filters
-                {(selectedYear || selectedMonth) && (
+                {selectedYear && (
                   <Badge variant="secondary" className="ml-2 h-5 px-1 text-xs">
-                    {selectedMonth ? `${selectedYear}/${selectedMonth}` : selectedYear}
+                    {selectedYear}
                   </Badge>
                 )}
               </Button>
@@ -126,56 +103,21 @@ export const DashboardHeader = ({ isDarkMode, toggleTheme, selectedStation, sele
             <PopoverContent className="w-80">
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <h4 className="font-medium">Filter Data</h4>
-                  <RadioGroup value={filterMode} onValueChange={(value) => setFilterMode(value as "year" | "month")}>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="year" id="year" />
-                      <Label htmlFor="year">By Year</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="month" id="month" />
-                      <Label htmlFor="month">By Year and Month</Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-
-                <div className="space-y-3">
-                  <div className="space-y-2">
-                    <Label>Year</Label>
-                    <Select 
-                      value={tempYear?.toString() || ""} 
-                      onValueChange={(value) => setTempYear(parseInt(value))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select Year" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {years.map(year => (
-                          <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {filterMode === "month" && (
-                    <div className="space-y-2">
-                      <Label>Month</Label>
-                      <Select 
-                        value={tempMonth?.toString() || ""} 
-                        onValueChange={(value) => setTempMonth(parseInt(value))}
-                        disabled={!tempYear}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select Month" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {months.map(month => (
-                            <SelectItem key={month.value} value={month.value.toString()}>{month.label}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
+                  <h4 className="font-medium">Filter by Year</h4>
+                  <Label>Select Year</Label>
+                  <Select 
+                    value={tempYear?.toString() || ""} 
+                    onValueChange={(value) => setTempYear(parseInt(value))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Year" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {years.map(year => (
+                        <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="flex gap-2">

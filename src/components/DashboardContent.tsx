@@ -35,35 +35,6 @@ export const DashboardContent = ({ selectedStation, onStationSelect, stationData
               stationsWithData={stationsWithData}
             />
             <MetricsOverview stationData={stationData} />
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="border-temperature/20 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-temperature">
-                    Temperature Trends
-                  </CardTitle>
-                  <CardDescription>
-                    Monthly average temperature over the selected period
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <TemperatureChart data={stationData} />
-                </CardContent>
-              </Card>
-
-              <Card className="border-rainfall/20 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-rainfall">
-                    Rainfall Distribution
-                  </CardTitle>
-                  <CardDescription>
-                    Monthly precipitation totals and patterns
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <RainfallChart data={stationData} />
-                </CardContent>
-              </Card>
-            </div>
           </>
         );
       
